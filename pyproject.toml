@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vode"
+version = "0.1.0"
+description = "Function-level execution tracer for Python/PyTorch"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+torch = ["torch"]
+dev = ["pytest>=7.0"]
+
+[project.scripts]
+vode = "vode.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]

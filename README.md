@@ -6,7 +6,7 @@ A lightweight function-level execution tracing and visualization tool for Python
 
 Vode captures function call trees, parameters, return values, and dataflow relationships during Python program execution. It's designed for debugging, understanding code flow, and visualizing execution patterns.
 
-**Current Status**: Stage 1 (Trace functionality) - ✅ Complete
+**Current Status**: Stage 2 (Web Viewer) - ✅ Complete
 
 ## Features
 
@@ -17,7 +17,7 @@ Vode captures function call trees, parameters, return values, and dataflow relat
 - ✅ **PyTorch tensor support** with shape/dtype/device/stats extraction
 - ✅ **JSON serialization** for persistence
 - ✅ **Text rendering** for quick inspection
-- ⏳ **Web visualization** (Stage 2 - planned)
+- ✅ **Web visualization** with interactive call tree and dataflow views
 
 ## Installation
 
@@ -155,14 +155,24 @@ pytest tests/test_integration.py -v
 
 ## Documentation
 
+**Stage 1 (Tracing)**:
+
 - [`docs/stage1/capabilities.md`](docs/stage1/capabilities.md) - Feature scope and examples
 - [`docs/stage1/todo.md`](docs/stage1/todo.md) - Technical implementation plan
 - [`docs/stage1/report.md`](docs/stage1/report.md) - Implementation report (Chinese)
 
+**Stage 2 (Web Viewer)**:
+
+- [`docs/stage2/capabilities.md`](docs/stage2/capabilities.md) - Capability boundaries
+- [`docs/stage2/design.md`](docs/stage2/design.md) - UI/UX design document
+- [`docs/stage2/todo.md`](docs/stage2/todo.md) - Technical implementation plan
+- [`docs/stage2/report.md`](docs/stage2/report.md) - Implementation report (Chinese)
+- [`docs/stage2/quickstart.md`](docs/stage2/quickstart.md) - Quick start guide (Chinese)
+
 ## Roadmap
 
 - [x] Stage 1: Trace functionality
-- [ ] Stage 2: Web visualization
+- [x] Stage 2: Web visualization
 - [ ] Stage 3: Performance profiling
 - [ ] Stage 4: Multi-framework support
 

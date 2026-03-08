@@ -66,6 +66,27 @@ def create_parser() -> argparse.ArgumentParser:
     # View command
     view_parser = subparsers.add_parser("view", help="View a saved trace file")
     view_parser.add_argument("trace_file", help="Path to trace JSON file")
+    view_parser.add_argument(
+        "--web",
+        action="store_true",
+        help="Start web viewer (default: text output)",
+    )
+    view_parser.add_argument(
+        "--host",
+        default="127.0.0.1",
+        help="Server host (default: 127.0.0.1)",
+    )
+    view_parser.add_argument(
+        "--port",
+        type=int,
+        default=8000,
+        help="Server port (default: 8000)",
+    )
+    view_parser.add_argument(
+        "--no-browser",
+        action="store_true",
+        help="Don't open browser automatically",
+    )
 
     return parser
 
@@ -195,7 +216,26 @@ def view_command(args: argparse.Namespace) -> int:
         print(f"Error: Trace file not found: {trace_file}", file=sys.stderr)
         return 1
 
-    # Load the trace
+    # Check if web viewer is requested
+    if hasattr(args, 'web') and args.web:
+        # Start web viewer
+        try:
+            from vode.view.server import ViewServer
+            
+            host = getattr(args, 'host', '127.0.0.1')
+            port = getattr(args, 'port', 8000)
+            no_browser = getattr(args, 'no_browser', False)
+            
+            server = ViewServer(trace_file, host, port)
+            server.run(open_browser=not no_browser)
+            return 0
+        except Exception as e:
+            print(f"Error starting web viewer: {e}", file=sys.stderr)
+            import traceback
+            traceback.print_exc()
+            return 1
+
+    # Default: text rendering
     try:
         serializer = GraphSerializer()
         graph = serializer.deserialize(str(trace_file))

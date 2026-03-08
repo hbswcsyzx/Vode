@@ -1,0 +1,1325 @@
+{
+  "version": "1.0",
+  "timestamp": "2026-03-07T16:21:27.575142+00:00",
+  "graph": {
+    "root_call_ids": [
+      "call:0"
+    ],
+    "function_calls": [
+      {
+        "id": "call:0",
+        "parent_id": null,
+        "qualified_name": "<module>",
+        "display_name": "<module>",
+        "filename": "/home/zyf/XXX/vode/tests/level_4_complex_nn/advanced_architectures.py",
+        "lineno": 0,
+        "depth": 0,
+        "arg_variable_ids": [],
+        "return_variable_ids": [],
+        "metadata": {}
+      },
+      {
+        "id": "call:1",
+        "parent_id": "call:0",
+        "qualified_name": "AttentionModule",
+        "display_name": "AttentionModule",
+        "filename": "/home/zyf/XXX/vode/tests/level_4_complex_nn/advanced_architectures.py",
+        "lineno": 11,
+        "depth": 1,
+        "arg_variable_ids": [],
+        "return_variable_ids": [
+          "var:140003370800544:return"
+        ],
+        "metadata": {}
+      },
+      {
+        "id": "call:2",
+        "parent_id": "call:0",
+        "qualified_name": "MultiOutputModel",
+        "display_name": "MultiOutputModel",
+        "filename": "/home/zyf/XXX/vode/tests/level_4_complex_nn/advanced_architectures.py",
+        "lineno": 33,
+        "depth": 1,
+        "arg_variable_ids": [],
+        "return_variable_ids": [
+          "var:140003370805488:return"
+        ],
+        "metadata": {}
+      },
+      {
+        "id": "call:3",
+        "parent_id": "call:0",
+        "qualified_name": "MultiInputModel",
+        "display_name": "MultiInputModel",
+        "filename": "/home/zyf/XXX/vode/tests/level_4_complex_nn/advanced_architectures.py",
+        "lineno": 54,
+        "depth": 1,
+        "arg_variable_ids": [],
+        "return_variable_ids": [
+          "var:140003370805824:return"
+        ],
+        "metadata": {}
+      },
+      {
+        "id": "call:4",
+        "parent_id": "call:0",
+        "qualified_name": "TransformerBlock",
+        "display_name": "TransformerBlock",
+        "filename": "/home/zyf/XXX/vode/tests/level_4_complex_nn/advanced_architectures.py",
+        "lineno": 71,
+        "depth": 1,
+        "arg_variable_ids": [],
+        "return_variable_ids": [
+          "var:140003370806160:return"
+        ],
+        "metadata": {}
+      },
+      {
+        "id": "call:5",
+        "parent_id": "call:0",
+        "qualified_name": "ConditionalModel",
+        "display_name": "ConditionalModel",
+        "filename": "/home/zyf/XXX/vode/tests/level_4_complex_nn/advanced_architectures.py",
+        "lineno": 97,
+        "depth": 1,
+        "arg_variable_ids": [],
+        "return_variable_ids": [
+          "var:140003370807552:return"
+        ],
+        "metadata": {}
+      },
+      {
+        "id": "call:6",
+        "parent_id": "call:0",
+        "qualified_name": "main",
+        "display_name": "main",
+        "filename": "/home/zyf/XXX/vode/tests/level_4_complex_nn/advanced_architectures.py",
+        "lineno": 119,
+        "depth": 1,
+        "arg_variable_ids": [],
+        "return_variable_ids": [
+          "var:139996087596720:return"
+        ],
+        "metadata": {}
+      },
+      {
+        "id": "call:7",
+        "parent_id": "call:6",
+        "qualified_name": "AttentionModule.__init__",
+        "display_name": "AttentionModule.__init__",
+        "filename": "/home/zyf/XXX/vode/tests/level_4_complex_nn/advanced_architectures.py",
+        "lineno": 14,
+        "depth": 2,
+        "arg_variable_ids": [
+          "var:140003370808912:arg.self",
+          "var:94007449936808:arg.dim"
+        ],
+        "return_variable_ids": [],
+        "metadata": {
+          "is_torch_module": true,
+          "module_class": "AttentionModule",
+          "module_type": "AttentionModule"
+        }
+      },
+      {
+        "id": "call:8",
+        "parent_id": "call:6",
+        "qualified_name": "AttentionModule.forward",
+        "display_name": "AttentionModule.forward",
+        "filename": "/home/zyf/XXX/vode/tests/level_4_complex_nn/advanced_architectures.py",
+        "lineno": 20,
+        "depth": 2,
+        "arg_variable_ids": [
+          "var:140003370808912:arg.self",
+          "var:139996087585440:arg.x"
+        ],
+        "return_variable_ids": [
+          "var:139996087587280:return.0",
+          "var:139996087587120:return.1"
+        ],
+        "metadata": {
+          "is_torch_module": true,
+          "module_class": "AttentionModule",
+          "module_type": "AttentionModule"
+        }
+      },
+      {
+        "id": "call:9",
+        "parent_id": "call:6",
+        "qualified_name": "MultiOutputModel.__init__",
+        "display_name": "MultiOutputModel.__init__",
+        "filename": "/home/zyf/XXX/vode/tests/level_4_complex_nn/advanced_architectures.py",
+        "lineno": 36,
+        "depth": 2,
+        "arg_variable_ids": [
+          "var:139996094962080:arg.self"
+        ],
+        "return_variable_ids": [],
+        "metadata": {
+          "is_torch_module": true,
+          "module_class": "MultiOutputModel",
+          "module_type": "MultiOutputModel"
+        }
+      },
+      {
+        "id": "call:10",
+        "parent_id": "call:6",
+        "qualified_name": "MultiOutputModel.forward",
+        "display_name": "MultiOutputModel.forward",
+        "filename": "/home/zyf/XXX/vode/tests/level_4_complex_nn/advanced_architectures.py",
+        "lineno": 42,
+        "depth": 2,
+        "arg_variable_ids": [
+          "var:139996094962080:arg.self",
+          "var:139996087587600:arg.x"
+        ],
+        "return_variable_ids": [
+          "var:139996087588720:return.features",
+          "var:139996087588640:return.logits",
+          "var:139996087588800:return.value"
+        ],
+        "metadata": {
+          "is_torch_module": true,
+          "module_class": "MultiOutputModel",
+          "module_type": "MultiOutputModel"
+        }
+      },
+      {
+        "id": "call:11",
+        "parent_id": "call:6",
+        "qualified_name": "MultiInputModel.__init__",
+        "display_name": "MultiInputModel.__init__",
+        "filename": "/home/zyf/XXX/vode/tests/level_4_complex_nn/advanced_architectures.py",
+        "lineno": 57,
+        "depth": 2,
+        "arg_variable_ids": [
+          "var:139996087388496:arg.self"
+        ],
+        "return_variable_ids": [],
+        "metadata": {
+          "is_torch_module": true,
+          "module_class": "MultiInputModel",
+          "module_type": "MultiInputModel"
+        }
+      },
+      {
+        "id": "call:12",
+        "parent_id": "call:6",
+        "qualified_name": "MultiInputModel.forward",
+        "display_name": "MultiInputModel.forward",
+        "filename": "/home/zyf/XXX/vode/tests/level_4_complex_nn/advanced_architectures.py",
+        "lineno": 63,
+        "depth": 2,
+        "arg_variable_ids": [
+          "var:139996087388496:arg.self",
+          "var:139996087589520:arg.input1",
+          "var:139996087590080:arg.input2"
+        ],
+        "return_variable_ids": [
+          "var:139996087590800:return"
+        ],
+        "metadata": {
+          "is_torch_module": true,
+          "module_class": "MultiInputModel",
+          "module_type": "MultiInputModel"
+        }
+      },
+      {
+        "id": "call:13",
+        "parent_id": "call:6",
+        "qualified_name": "TransformerBlock.__init__",
+        "display_name": "TransformerBlock.__init__",
+        "filename": "/home/zyf/XXX/vode/tests/level_4_complex_nn/advanced_architectures.py",
+        "lineno": 74,
+        "depth": 2,
+        "arg_variable_ids": [
+          "var:139996087390848:arg.self",
+          "var:94007449937320:arg.dim",
+          "var:94007449936424:arg.num_heads"
+        ],
+        "return_variable_ids": [],
+        "metadata": {
+          "is_torch_module": true,
+          "module_class": "TransformerBlock",
+          "module_type": "TransformerBlock"
+        }
+      },
+      {
+        "id": "call:14",
+        "parent_id": "call:6",
+        "qualified_name": "TransformerBlock.forward",
+        "display_name": "TransformerBlock.forward",
+        "filename": "/home/zyf/XXX/vode/tests/level_4_complex_nn/advanced_architectures.py",
+        "lineno": 85,
+        "depth": 2,
+        "arg_variable_ids": [
+          "var:139996087390848:arg.self",
+          "var:139996102423840:arg.x"
+        ],
+        "return_variable_ids": [
+          "var:139996087596720:return.0",
+          "var:139996087595840:return.1"
+        ],
+        "metadata": {
+          "is_torch_module": true,
+          "module_class": "TransformerBlock",
+          "module_type": "TransformerBlock"
+        }
+      },
+      {
+        "id": "call:15",
+        "parent_id": "call:6",
+        "qualified_name": "ConditionalModel.__init__",
+        "display_name": "ConditionalModel.__init__",
+        "filename": "/home/zyf/XXX/vode/tests/level_4_complex_nn/advanced_architectures.py",
+        "lineno": 100,
+        "depth": 2,
+        "arg_variable_ids": [
+          "var:139996091643424:arg.self"
+        ],
+        "return_variable_ids": [],
+        "metadata": {
+          "is_torch_module": true,
+          "module_class": "ConditionalModel",
+          "module_type": "ConditionalModel"
+        }
+      },
+      {
+        "id": "call:16",
+        "parent_id": "call:6",
+        "qualified_name": "ConditionalModel.forward",
+        "display_name": "ConditionalModel.forward",
+        "filename": "/home/zyf/XXX/vode/tests/level_4_complex_nn/advanced_architectures.py",
+        "lineno": 106,
+        "depth": 2,
+        "arg_variable_ids": [
+          "var:139996091643424:arg.self",
+          "var:139996087597120:arg.x",
+          "var:94007449932128:arg.use_path_a"
+        ],
+        "return_variable_ids": [
+          "var:139996087598400:return"
+        ],
+        "metadata": {
+          "is_torch_module": true,
+          "module_class": "ConditionalModel",
+          "module_type": "ConditionalModel"
+        }
+      },
+      {
+        "id": "call:17",
+        "parent_id": "call:6",
+        "qualified_name": "ConditionalModel.forward",
+        "display_name": "ConditionalModel.forward",
+        "filename": "/home/zyf/XXX/vode/tests/level_4_complex_nn/advanced_architectures.py",
+        "lineno": 106,
+        "depth": 2,
+        "arg_variable_ids": [
+          "var:139996091643424:arg.self",
+          "var:139996087597120:arg.x",
+          "var:94007449931680:arg.use_path_a"
+        ],
+        "return_variable_ids": [
+          "var:139996087681184:return"
+        ],
+        "metadata": {
+          "is_torch_module": true,
+          "module_class": "ConditionalModel",
+          "module_type": "ConditionalModel"
+        }
+      }
+    ],
+    "variables": [
+      {
+        "id": "var:140003370800544:return",
+        "slot_path": "return",
+        "display_name": "return",
+        "runtime_object_id": 140003370800544,
+        "type_name": "cell",
+        "tensor_meta": null,
+        "tensor_stats": null,
+        "preview": {
+          "text": "<cell object>",
+          "data": null
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:140003370805488:return",
+        "slot_path": "return",
+        "display_name": "return",
+        "runtime_object_id": 140003370805488,
+        "type_name": "cell",
+        "tensor_meta": null,
+        "tensor_stats": null,
+        "preview": {
+          "text": "<cell object>",
+          "data": null
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:140003370805824:return",
+        "slot_path": "return",
+        "display_name": "return",
+        "runtime_object_id": 140003370805824,
+        "type_name": "cell",
+        "tensor_meta": null,
+        "tensor_stats": null,
+        "preview": {
+          "text": "<cell object>",
+          "data": null
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:140003370806160:return",
+        "slot_path": "return",
+        "display_name": "return",
+        "runtime_object_id": 140003370806160,
+        "type_name": "cell",
+        "tensor_meta": null,
+        "tensor_stats": null,
+        "preview": {
+          "text": "<cell object>",
+          "data": null
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:140003370807552:return",
+        "slot_path": "return",
+        "display_name": "return",
+        "runtime_object_id": 140003370807552,
+        "type_name": "cell",
+        "tensor_meta": null,
+        "tensor_stats": null,
+        "preview": {
+          "text": "<cell object>",
+          "data": null
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:140003370808912:arg.self",
+        "slot_path": "arg.self",
+        "display_name": "self",
+        "runtime_object_id": 140003370808912,
+        "type_name": "AttentionModule",
+        "tensor_meta": null,
+        "tensor_stats": null,
+        "preview": {
+          "text": "<AttentionModule module>",
+          "data": null
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:94007449936808:arg.dim",
+        "slot_path": "arg.dim",
+        "display_name": "dim",
+        "runtime_object_id": 94007449936808,
+        "type_name": "int",
+        "tensor_meta": null,
+        "tensor_stats": null,
+        "preview": {
+          "text": "16",
+          "data": 16
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:140003370808912:arg.self",
+        "slot_path": "arg.self",
+        "display_name": "self",
+        "runtime_object_id": 140003370808912,
+        "type_name": "AttentionModule",
+        "tensor_meta": null,
+        "tensor_stats": null,
+        "preview": {
+          "text": "<AttentionModule module>",
+          "data": null
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:139996087585440:arg.x",
+        "slot_path": "arg.x",
+        "display_name": "x",
+        "runtime_object_id": 139996087585440,
+        "type_name": "torch.Tensor",
+        "tensor_meta": {
+          "shape": [
+            2,
+            8,
+            16
+          ],
+          "dtype": "torch.float32",
+          "device": "cpu",
+          "requires_grad": false,
+          "numel": 256
+        },
+        "tensor_stats": {
+          "min": -2.536903142929077,
+          "max": 3.054575204849243,
+          "mean": 0.03528636693954468,
+          "std": 1.0249450206756592
+        },
+        "preview": {
+          "text": "Tensor(2, 8, 16)",
+          "data": null
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:139996087587280:return.0",
+        "slot_path": "return.0",
+        "display_name": "0",
+        "runtime_object_id": 139996087587280,
+        "type_name": "torch.Tensor",
+        "tensor_meta": {
+          "shape": [
+            2,
+            8,
+            16
+          ],
+          "dtype": "torch.float32",
+          "device": "cpu",
+          "requires_grad": true,
+          "numel": 256
+        },
+        "tensor_stats": {
+          "min": -1.1543385982513428,
+          "max": 1.1889077425003052,
+          "mean": 0.052141398191452026,
+          "std": 0.4244779944419861
+        },
+        "preview": {
+          "text": "Tensor(2, 8, 16)",
+          "data": null
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:139996087587120:return.1",
+        "slot_path": "return.1",
+        "display_name": "1",
+        "runtime_object_id": 139996087587120,
+        "type_name": "torch.Tensor",
+        "tensor_meta": {
+          "shape": [
+            2,
+            8,
+            8
+          ],
+          "dtype": "torch.float32",
+          "device": "cpu",
+          "requires_grad": true,
+          "numel": 128
+        },
+        "tensor_stats": {
+          "min": 0.00029209881904534996,
+          "max": 0.8379107117652893,
+          "mean": 0.125,
+          "std": 0.15768727660179138
+        },
+        "preview": {
+          "text": "Tensor(2, 8, 8)",
+          "data": null
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:139996094962080:arg.self",
+        "slot_path": "arg.self",
+        "display_name": "self",
+        "runtime_object_id": 139996094962080,
+        "type_name": "MultiOutputModel",
+        "tensor_meta": null,
+        "tensor_stats": null,
+        "preview": {
+          "text": "<MultiOutputModel module>",
+          "data": null
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:139996094962080:arg.self",
+        "slot_path": "arg.self",
+        "display_name": "self",
+        "runtime_object_id": 139996094962080,
+        "type_name": "MultiOutputModel",
+        "tensor_meta": null,
+        "tensor_stats": null,
+        "preview": {
+          "text": "<MultiOutputModel module>",
+          "data": null
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:139996087587600:arg.x",
+        "slot_path": "arg.x",
+        "display_name": "x",
+        "runtime_object_id": 139996087587600,
+        "type_name": "torch.Tensor",
+        "tensor_meta": {
+          "shape": [
+            4,
+            10
+          ],
+          "dtype": "torch.float32",
+          "device": "cpu",
+          "requires_grad": false,
+          "numel": 40
+        },
+        "tensor_stats": {
+          "min": -2.201507329940796,
+          "max": 2.264073371887207,
+          "mean": -0.15894122421741486,
+          "std": 1.0762979984283447
+        },
+        "preview": {
+          "text": "Tensor(4, 10)",
+          "data": null
+        },
+        "producer_call_id": "call:12",
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:139996087588720:return.features",
+        "slot_path": "return.features",
+        "display_name": "features",
+        "runtime_object_id": 139996087588720,
+        "type_name": "torch.Tensor",
+        "tensor_meta": {
+          "shape": [
+            4,
+            20
+          ],
+          "dtype": "torch.float32",
+          "device": "cpu",
+          "requires_grad": true,
+          "numel": 80
+        },
+        "tensor_stats": {
+          "min": 0.0,
+          "max": 1.6878623962402344,
+          "mean": 0.22182457149028778,
+          "std": 0.3589692711830139
+        },
+        "preview": {
+          "text": "Tensor(4, 20)",
+          "data": null
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:139996087588640:return.logits",
+        "slot_path": "return.logits",
+        "display_name": "logits",
+        "runtime_object_id": 139996087588640,
+        "type_name": "torch.Tensor",
+        "tensor_meta": {
+          "shape": [
+            4,
+            5
+          ],
+          "dtype": "torch.float32",
+          "device": "cpu",
+          "requires_grad": true,
+          "numel": 20
+        },
+        "tensor_stats": {
+          "min": -0.3951106071472168,
+          "max": 0.7104997634887695,
+          "mean": 0.06738176196813583,
+          "std": 0.34768685698509216
+        },
+        "preview": {
+          "text": "Tensor(4, 5)",
+          "data": null
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:139996087588800:return.value",
+        "slot_path": "return.value",
+        "display_name": "value",
+        "runtime_object_id": 139996087588800,
+        "type_name": "torch.Tensor",
+        "tensor_meta": {
+          "shape": [
+            4,
+            1
+          ],
+          "dtype": "torch.float32",
+          "device": "cpu",
+          "requires_grad": true,
+          "numel": 4
+        },
+        "tensor_stats": {
+          "min": 0.1678994745016098,
+          "max": 0.2509615421295166,
+          "mean": 0.19527631998062134,
+          "std": 0.03773242607712746
+        },
+        "preview": {
+          "text": "Tensor(4, 1)",
+          "data": null
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:139996087388496:arg.self",
+        "slot_path": "arg.self",
+        "display_name": "self",
+        "runtime_object_id": 139996087388496,
+        "type_name": "MultiInputModel",
+        "tensor_meta": null,
+        "tensor_stats": null,
+        "preview": {
+          "text": "<MultiInputModel module>",
+          "data": null
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:139996087388496:arg.self",
+        "slot_path": "arg.self",
+        "display_name": "self",
+        "runtime_object_id": 139996087388496,
+        "type_name": "MultiInputModel",
+        "tensor_meta": null,
+        "tensor_stats": null,
+        "preview": {
+          "text": "<MultiInputModel module>",
+          "data": null
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:139996087589520:arg.input1",
+        "slot_path": "arg.input1",
+        "display_name": "input1",
+        "runtime_object_id": 139996087589520,
+        "type_name": "torch.Tensor",
+        "tensor_meta": {
+          "shape": [
+            4,
+            10
+          ],
+          "dtype": "torch.float32",
+          "device": "cpu",
+          "requires_grad": false,
+          "numel": 40
+        },
+        "tensor_stats": {
+          "min": -2.2603135108947754,
+          "max": 1.8210171461105347,
+          "mean": 0.1600145399570465,
+          "std": 1.0148899555206299
+        },
+        "preview": {
+          "text": "Tensor(4, 10)",
+          "data": null
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:139996087590080:arg.input2",
+        "slot_path": "arg.input2",
+        "display_name": "input2",
+        "runtime_object_id": 139996087590080,
+        "type_name": "torch.Tensor",
+        "tensor_meta": {
+          "shape": [
+            4,
+            5
+          ],
+          "dtype": "torch.float32",
+          "device": "cpu",
+          "requires_grad": false,
+          "numel": 20
+        },
+        "tensor_stats": {
+          "min": -1.6130173206329346,
+          "max": 1.413904070854187,
+          "mean": 0.2068236768245697,
+          "std": 0.7546524405479431
+        },
+        "preview": {
+          "text": "Tensor(4, 5)",
+          "data": null
+        },
+        "producer_call_id": "call:17",
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:139996087590800:return",
+        "slot_path": "return",
+        "display_name": "return",
+        "runtime_object_id": 139996087590800,
+        "type_name": "torch.Tensor",
+        "tensor_meta": {
+          "shape": [
+            4,
+            10
+          ],
+          "dtype": "torch.float32",
+          "device": "cpu",
+          "requires_grad": true,
+          "numel": 40
+        },
+        "tensor_stats": {
+          "min": -0.7244132161140442,
+          "max": 1.6370936632156372,
+          "mean": 0.17406661808490753,
+          "std": 0.38122469186782837
+        },
+        "preview": {
+          "text": "Tensor(4, 10)",
+          "data": null
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:139996087390848:arg.self",
+        "slot_path": "arg.self",
+        "display_name": "self",
+        "runtime_object_id": 139996087390848,
+        "type_name": "TransformerBlock",
+        "tensor_meta": null,
+        "tensor_stats": null,
+        "preview": {
+          "text": "<TransformerBlock module>",
+          "data": null
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:94007449937320:arg.dim",
+        "slot_path": "arg.dim",
+        "display_name": "dim",
+        "runtime_object_id": 94007449937320,
+        "type_name": "int",
+        "tensor_meta": null,
+        "tensor_stats": null,
+        "preview": {
+          "text": "32",
+          "data": 32
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:94007449936424:arg.num_heads",
+        "slot_path": "arg.num_heads",
+        "display_name": "num_heads",
+        "runtime_object_id": 94007449936424,
+        "type_name": "int",
+        "tensor_meta": null,
+        "tensor_stats": null,
+        "preview": {
+          "text": "4",
+          "data": 4
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:139996087390848:arg.self",
+        "slot_path": "arg.self",
+        "display_name": "self",
+        "runtime_object_id": 139996087390848,
+        "type_name": "TransformerBlock",
+        "tensor_meta": null,
+        "tensor_stats": null,
+        "preview": {
+          "text": "<TransformerBlock module>",
+          "data": null
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:139996102423840:arg.x",
+        "slot_path": "arg.x",
+        "display_name": "x",
+        "runtime_object_id": 139996102423840,
+        "type_name": "torch.Tensor",
+        "tensor_meta": {
+          "shape": [
+            2,
+            10,
+            32
+          ],
+          "dtype": "torch.float32",
+          "device": "cpu",
+          "requires_grad": false,
+          "numel": 640
+        },
+        "tensor_stats": {
+          "min": -2.7928435802459717,
+          "max": 4.222372055053711,
+          "mean": -0.0077804639004170895,
+          "std": 1.011661171913147
+        },
+        "preview": {
+          "text": "Tensor(2, 10, 32)",
+          "data": null
+        },
+        "producer_call_id": "call:6",
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:139996087596720:return.0",
+        "slot_path": "return.0",
+        "display_name": "0",
+        "runtime_object_id": 139996087596720,
+        "type_name": "torch.Tensor",
+        "tensor_meta": {
+          "shape": [
+            2,
+            10,
+            32
+          ],
+          "dtype": "torch.float32",
+          "device": "cpu",
+          "requires_grad": true,
+          "numel": 640
+        },
+        "tensor_stats": {
+          "min": -2.890383005142212,
+          "max": 3.502629518508911,
+          "mean": -2.9802322831784522e-09,
+          "std": 1.0007773637771606
+        },
+        "preview": {
+          "text": "Tensor(2, 10, 32)",
+          "data": null
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:139996087595840:return.1",
+        "slot_path": "return.1",
+        "display_name": "1",
+        "runtime_object_id": 139996087595840,
+        "type_name": "torch.Tensor",
+        "tensor_meta": {
+          "shape": [
+            2,
+            10,
+            10
+          ],
+          "dtype": "torch.float32",
+          "device": "cpu",
+          "requires_grad": true,
+          "numel": 200
+        },
+        "tensor_stats": {
+          "min": 0.05277295783162117,
+          "max": 0.18692940473556519,
+          "mean": 0.10000000149011612,
+          "std": 0.023835983127355576
+        },
+        "preview": {
+          "text": "Tensor(2, 10, 10)",
+          "data": null
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:139996091643424:arg.self",
+        "slot_path": "arg.self",
+        "display_name": "self",
+        "runtime_object_id": 139996091643424,
+        "type_name": "ConditionalModel",
+        "tensor_meta": null,
+        "tensor_stats": null,
+        "preview": {
+          "text": "<ConditionalModel module>",
+          "data": null
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:139996091643424:arg.self",
+        "slot_path": "arg.self",
+        "display_name": "self",
+        "runtime_object_id": 139996091643424,
+        "type_name": "ConditionalModel",
+        "tensor_meta": null,
+        "tensor_stats": null,
+        "preview": {
+          "text": "<ConditionalModel module>",
+          "data": null
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:139996087597120:arg.x",
+        "slot_path": "arg.x",
+        "display_name": "x",
+        "runtime_object_id": 139996087597120,
+        "type_name": "torch.Tensor",
+        "tensor_meta": {
+          "shape": [
+            4,
+            10
+          ],
+          "dtype": "torch.float32",
+          "device": "cpu",
+          "requires_grad": false,
+          "numel": 40
+        },
+        "tensor_stats": {
+          "min": -3.9330012798309326,
+          "max": 2.176358461380005,
+          "mean": -0.08143016695976257,
+          "std": 1.1109381914138794
+        },
+        "preview": {
+          "text": "Tensor(4, 10)",
+          "data": null
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:94007449932128:arg.use_path_a",
+        "slot_path": "arg.use_path_a",
+        "display_name": "use_path_a",
+        "runtime_object_id": 94007449932128,
+        "type_name": "bool",
+        "tensor_meta": null,
+        "tensor_stats": null,
+        "preview": {
+          "text": "True",
+          "data": true
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:139996087598400:return",
+        "slot_path": "return",
+        "display_name": "return",
+        "runtime_object_id": 139996087598400,
+        "type_name": "torch.Tensor",
+        "tensor_meta": {
+          "shape": [
+            4,
+            5
+          ],
+          "dtype": "torch.float32",
+          "device": "cpu",
+          "requires_grad": true,
+          "numel": 20
+        },
+        "tensor_stats": {
+          "min": -0.585219144821167,
+          "max": 0.6648939251899719,
+          "mean": -0.059005070477724075,
+          "std": 0.311369925737381
+        },
+        "preview": {
+          "text": "Tensor(4, 5)",
+          "data": null
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:139996091643424:arg.self",
+        "slot_path": "arg.self",
+        "display_name": "self",
+        "runtime_object_id": 139996091643424,
+        "type_name": "ConditionalModel",
+        "tensor_meta": null,
+        "tensor_stats": null,
+        "preview": {
+          "text": "<ConditionalModel module>",
+          "data": null
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:139996087597120:arg.x",
+        "slot_path": "arg.x",
+        "display_name": "x",
+        "runtime_object_id": 139996087597120,
+        "type_name": "torch.Tensor",
+        "tensor_meta": {
+          "shape": [
+            4,
+            10
+          ],
+          "dtype": "torch.float32",
+          "device": "cpu",
+          "requires_grad": false,
+          "numel": 40
+        },
+        "tensor_stats": {
+          "min": -3.9330012798309326,
+          "max": 2.176358461380005,
+          "mean": -0.08143016695976257,
+          "std": 1.1109381914138794
+        },
+        "preview": {
+          "text": "Tensor(4, 10)",
+          "data": null
+        },
+        "producer_call_id": "call:12",
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:94007449931680:arg.use_path_a",
+        "slot_path": "arg.use_path_a",
+        "display_name": "use_path_a",
+        "runtime_object_id": 94007449931680,
+        "type_name": "bool",
+        "tensor_meta": null,
+        "tensor_stats": null,
+        "preview": {
+          "text": "False",
+          "data": false
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:139996087681184:return",
+        "slot_path": "return",
+        "display_name": "return",
+        "runtime_object_id": 139996087681184,
+        "type_name": "torch.Tensor",
+        "tensor_meta": {
+          "shape": [
+            4,
+            5
+          ],
+          "dtype": "torch.float32",
+          "device": "cpu",
+          "requires_grad": true,
+          "numel": 20
+        },
+        "tensor_stats": {
+          "min": -0.9273409247398376,
+          "max": 0.42779088020324707,
+          "mean": -0.06902137398719788,
+          "std": 0.3522486388683319
+        },
+        "preview": {
+          "text": "Tensor(4, 5)",
+          "data": null
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:139996087596720:return",
+        "slot_path": "return",
+        "display_name": "return",
+        "runtime_object_id": 139996087596720,
+        "type_name": "torch.Tensor",
+        "tensor_meta": {
+          "shape": [
+            2,
+            10,
+            32
+          ],
+          "dtype": "torch.float32",
+          "device": "cpu",
+          "requires_grad": true,
+          "numel": 640
+        },
+        "tensor_stats": {
+          "min": -2.890383005142212,
+          "max": 3.502629518508911,
+          "mean": -2.9802322831784522e-09,
+          "std": 1.0007773637771606
+        },
+        "preview": {
+          "text": "Tensor(2, 10, 32)",
+          "data": null
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      }
+    ],
+    "edges": [
+      {
+        "id": "edge:0",
+        "src_id": "call:0",
+        "dst_id": "call:1",
+        "kind": "call_tree"
+      },
+      {
+        "id": "edge:1",
+        "src_id": "call:0",
+        "dst_id": "call:2",
+        "kind": "call_tree"
+      },
+      {
+        "id": "edge:2",
+        "src_id": "call:0",
+        "dst_id": "call:3",
+        "kind": "call_tree"
+      },
+      {
+        "id": "edge:3",
+        "src_id": "call:0",
+        "dst_id": "call:4",
+        "kind": "call_tree"
+      },
+      {
+        "id": "edge:4",
+        "src_id": "call:0",
+        "dst_id": "call:5",
+        "kind": "call_tree"
+      },
+      {
+        "id": "edge:5",
+        "src_id": "call:0",
+        "dst_id": "call:6",
+        "kind": "call_tree"
+      },
+      {
+        "id": "edge:6",
+        "src_id": "call:6",
+        "dst_id": "call:7",
+        "kind": "call_tree"
+      },
+      {
+        "id": "edge:7",
+        "src_id": "call:6",
+        "dst_id": "call:8",
+        "kind": "call_tree"
+      },
+      {
+        "id": "edge:8",
+        "src_id": "call:6",
+        "dst_id": "call:9",
+        "kind": "call_tree"
+      },
+      {
+        "id": "edge:9",
+        "src_id": "call:6",
+        "dst_id": "call:10",
+        "kind": "call_tree"
+      },
+      {
+        "id": "edge:10",
+        "src_id": "call:6",
+        "dst_id": "call:11",
+        "kind": "call_tree"
+      },
+      {
+        "id": "edge:11",
+        "src_id": "call:6",
+        "dst_id": "call:12",
+        "kind": "call_tree"
+      },
+      {
+        "id": "edge:12",
+        "src_id": "call:6",
+        "dst_id": "call:13",
+        "kind": "call_tree"
+      },
+      {
+        "id": "edge:13",
+        "src_id": "call:6",
+        "dst_id": "call:14",
+        "kind": "call_tree"
+      },
+      {
+        "id": "edge:14",
+        "src_id": "call:6",
+        "dst_id": "call:15",
+        "kind": "call_tree"
+      },
+      {
+        "id": "edge:15",
+        "src_id": "call:6",
+        "dst_id": "call:16",
+        "kind": "call_tree"
+      },
+      {
+        "id": "edge:16",
+        "src_id": "call:6",
+        "dst_id": "call:17",
+        "kind": "call_tree"
+      },
+      {
+        "id": "edge:17",
+        "src_id": "call:12",
+        "dst_id": "call:10",
+        "kind": "dataflow"
+      },
+      {
+        "id": "edge:18",
+        "src_id": "call:10",
+        "dst_id": "call:12",
+        "kind": "dataflow"
+      },
+      {
+        "id": "edge:19",
+        "src_id": "call:16",
+        "dst_id": "call:12",
+        "kind": "dataflow"
+      },
+      {
+        "id": "edge:20",
+        "src_id": "call:17",
+        "dst_id": "call:12",
+        "kind": "dataflow"
+      },
+      {
+        "id": "edge:21",
+        "src_id": "call:6",
+        "dst_id": "call:14",
+        "kind": "dataflow"
+      },
+      {
+        "id": "edge:22",
+        "src_id": "call:12",
+        "dst_id": "call:16",
+        "kind": "dataflow"
+      },
+      {
+        "id": "edge:23",
+        "src_id": "call:12",
+        "dst_id": "call:17",
+        "kind": "dataflow"
+      }
+    ]
+  }
+}

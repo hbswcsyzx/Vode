@@ -1,0 +1,713 @@
+{
+  "version": "1.0",
+  "timestamp": "2026-03-07T16:20:09.485353+00:00",
+  "graph": {
+    "root_call_ids": [
+      "call:0"
+    ],
+    "function_calls": [
+      {
+        "id": "call:0",
+        "parent_id": null,
+        "qualified_name": "<module>",
+        "display_name": "<module>",
+        "filename": "/home/zyf/XXX/vode/tests/level_1_basic/simple_functions.py",
+        "lineno": 0,
+        "depth": 0,
+        "arg_variable_ids": [],
+        "return_variable_ids": [],
+        "metadata": {}
+      },
+      {
+        "id": "call:1",
+        "parent_id": "call:0",
+        "qualified_name": "main",
+        "display_name": "main",
+        "filename": "/home/zyf/XXX/vode/tests/level_1_basic/simple_functions.py",
+        "lineno": 30,
+        "depth": 1,
+        "arg_variable_ids": [],
+        "return_variable_ids": [
+          "var:94522037928232:return"
+        ],
+        "metadata": {}
+      },
+      {
+        "id": "call:2",
+        "parent_id": "call:1",
+        "qualified_name": "add",
+        "display_name": "add",
+        "filename": "/home/zyf/XXX/vode/tests/level_1_basic/simple_functions.py",
+        "lineno": 7,
+        "depth": 2,
+        "arg_variable_ids": [
+          "var:94522037920328:arg.a",
+          "var:94522037920264:arg.b"
+        ],
+        "return_variable_ids": [
+          "var:94522037920424:return"
+        ],
+        "metadata": {}
+      },
+      {
+        "id": "call:3",
+        "parent_id": "call:1",
+        "qualified_name": "multiply",
+        "display_name": "multiply",
+        "filename": "/home/zyf/XXX/vode/tests/level_1_basic/simple_functions.py",
+        "lineno": 12,
+        "depth": 2,
+        "arg_variable_ids": [
+          "var:94522037920296:arg.x",
+          "var:94522037920392:arg.y"
+        ],
+        "return_variable_ids": [
+          "var:94522037921064:return"
+        ],
+        "metadata": {}
+      },
+      {
+        "id": "call:4",
+        "parent_id": "call:1",
+        "qualified_name": "compute",
+        "display_name": "compute",
+        "filename": "/home/zyf/XXX/vode/tests/level_1_basic/simple_functions.py",
+        "lineno": 17,
+        "depth": 2,
+        "arg_variable_ids": [
+          "var:94522037920232:arg.a",
+          "var:94522037920264:arg.b",
+          "var:94522037920296:arg.c"
+        ],
+        "return_variable_ids": [
+          "var:94522037920808:return"
+        ],
+        "metadata": {}
+      },
+      {
+        "id": "call:5",
+        "parent_id": "call:4",
+        "qualified_name": "add",
+        "display_name": "add",
+        "filename": "/home/zyf/XXX/vode/tests/level_1_basic/simple_functions.py",
+        "lineno": 7,
+        "depth": 3,
+        "arg_variable_ids": [
+          "var:94522037920232:arg.a",
+          "var:94522037920264:arg.b"
+        ],
+        "return_variable_ids": [
+          "var:94522037920328:return"
+        ],
+        "metadata": {}
+      },
+      {
+        "id": "call:6",
+        "parent_id": "call:4",
+        "qualified_name": "multiply",
+        "display_name": "multiply",
+        "filename": "/home/zyf/XXX/vode/tests/level_1_basic/simple_functions.py",
+        "lineno": 12,
+        "depth": 3,
+        "arg_variable_ids": [
+          "var:94522037920328:arg.x",
+          "var:94522037920296:arg.y"
+        ],
+        "return_variable_ids": [
+          "var:94522037920808:return"
+        ],
+        "metadata": {}
+      },
+      {
+        "id": "call:7",
+        "parent_id": "call:1",
+        "qualified_name": "nested_compute",
+        "display_name": "nested_compute",
+        "filename": "/home/zyf/XXX/vode/tests/level_1_basic/simple_functions.py",
+        "lineno": 24,
+        "depth": 2,
+        "arg_variable_ids": [
+          "var:94522037920488:arg.x"
+        ],
+        "return_variable_ids": [
+          "var:94522037928232:return"
+        ],
+        "metadata": {}
+      },
+      {
+        "id": "call:8",
+        "parent_id": "call:7",
+        "qualified_name": "compute",
+        "display_name": "compute",
+        "filename": "/home/zyf/XXX/vode/tests/level_1_basic/simple_functions.py",
+        "lineno": 17,
+        "depth": 3,
+        "arg_variable_ids": [
+          "var:94522037920488:arg.a",
+          "var:94522037920520:arg.b",
+          "var:94522037920552:arg.c"
+        ],
+        "return_variable_ids": [
+          "var:94522037928232:return"
+        ],
+        "metadata": {}
+      },
+      {
+        "id": "call:9",
+        "parent_id": "call:8",
+        "qualified_name": "add",
+        "display_name": "add",
+        "filename": "/home/zyf/XXX/vode/tests/level_1_basic/simple_functions.py",
+        "lineno": 7,
+        "depth": 4,
+        "arg_variable_ids": [
+          "var:94522037920488:arg.a",
+          "var:94522037920520:arg.b"
+        ],
+        "return_variable_ids": [
+          "var:94522037920840:return"
+        ],
+        "metadata": {}
+      },
+      {
+        "id": "call:10",
+        "parent_id": "call:8",
+        "qualified_name": "multiply",
+        "display_name": "multiply",
+        "filename": "/home/zyf/XXX/vode/tests/level_1_basic/simple_functions.py",
+        "lineno": 12,
+        "depth": 4,
+        "arg_variable_ids": [
+          "var:94522037920840:arg.x",
+          "var:94522037920552:arg.y"
+        ],
+        "return_variable_ids": [
+          "var:94522037928232:return"
+        ],
+        "metadata": {}
+      }
+    ],
+    "variables": [
+      {
+        "id": "var:94522037920328:arg.a",
+        "slot_path": "arg.a",
+        "display_name": "a",
+        "runtime_object_id": 94522037920328,
+        "type_name": "int",
+        "tensor_meta": null,
+        "tensor_stats": null,
+        "preview": {
+          "text": "5",
+          "data": 5
+        },
+        "producer_call_id": "call:5",
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:94522037920264:arg.b",
+        "slot_path": "arg.b",
+        "display_name": "b",
+        "runtime_object_id": 94522037920264,
+        "type_name": "int",
+        "tensor_meta": null,
+        "tensor_stats": null,
+        "preview": {
+          "text": "3",
+          "data": 3
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:94522037920424:return",
+        "slot_path": "return",
+        "display_name": "return",
+        "runtime_object_id": 94522037920424,
+        "type_name": "int",
+        "tensor_meta": null,
+        "tensor_stats": null,
+        "preview": {
+          "text": "8",
+          "data": 8
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:94522037920296:arg.x",
+        "slot_path": "arg.x",
+        "display_name": "x",
+        "runtime_object_id": 94522037920296,
+        "type_name": "int",
+        "tensor_meta": null,
+        "tensor_stats": null,
+        "preview": {
+          "text": "4",
+          "data": 4
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:94522037920392:arg.y",
+        "slot_path": "arg.y",
+        "display_name": "y",
+        "runtime_object_id": 94522037920392,
+        "type_name": "int",
+        "tensor_meta": null,
+        "tensor_stats": null,
+        "preview": {
+          "text": "7",
+          "data": 7
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:94522037921064:return",
+        "slot_path": "return",
+        "display_name": "return",
+        "runtime_object_id": 94522037921064,
+        "type_name": "int",
+        "tensor_meta": null,
+        "tensor_stats": null,
+        "preview": {
+          "text": "28",
+          "data": 28
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:94522037920232:arg.a",
+        "slot_path": "arg.a",
+        "display_name": "a",
+        "runtime_object_id": 94522037920232,
+        "type_name": "int",
+        "tensor_meta": null,
+        "tensor_stats": null,
+        "preview": {
+          "text": "2",
+          "data": 2
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:94522037920264:arg.b",
+        "slot_path": "arg.b",
+        "display_name": "b",
+        "runtime_object_id": 94522037920264,
+        "type_name": "int",
+        "tensor_meta": null,
+        "tensor_stats": null,
+        "preview": {
+          "text": "3",
+          "data": 3
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:94522037920296:arg.c",
+        "slot_path": "arg.c",
+        "display_name": "c",
+        "runtime_object_id": 94522037920296,
+        "type_name": "int",
+        "tensor_meta": null,
+        "tensor_stats": null,
+        "preview": {
+          "text": "4",
+          "data": 4
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:94522037920232:arg.a",
+        "slot_path": "arg.a",
+        "display_name": "a",
+        "runtime_object_id": 94522037920232,
+        "type_name": "int",
+        "tensor_meta": null,
+        "tensor_stats": null,
+        "preview": {
+          "text": "2",
+          "data": 2
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:94522037920264:arg.b",
+        "slot_path": "arg.b",
+        "display_name": "b",
+        "runtime_object_id": 94522037920264,
+        "type_name": "int",
+        "tensor_meta": null,
+        "tensor_stats": null,
+        "preview": {
+          "text": "3",
+          "data": 3
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:94522037920328:return",
+        "slot_path": "return",
+        "display_name": "return",
+        "runtime_object_id": 94522037920328,
+        "type_name": "int",
+        "tensor_meta": null,
+        "tensor_stats": null,
+        "preview": {
+          "text": "5",
+          "data": 5
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": [
+          "call:2",
+          "call:6"
+        ]
+      },
+      {
+        "id": "var:94522037920328:arg.x",
+        "slot_path": "arg.x",
+        "display_name": "x",
+        "runtime_object_id": 94522037920328,
+        "type_name": "int",
+        "tensor_meta": null,
+        "tensor_stats": null,
+        "preview": {
+          "text": "5",
+          "data": 5
+        },
+        "producer_call_id": "call:5",
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:94522037920296:arg.y",
+        "slot_path": "arg.y",
+        "display_name": "y",
+        "runtime_object_id": 94522037920296,
+        "type_name": "int",
+        "tensor_meta": null,
+        "tensor_stats": null,
+        "preview": {
+          "text": "4",
+          "data": 4
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:94522037920808:return",
+        "slot_path": "return",
+        "display_name": "return",
+        "runtime_object_id": 94522037920808,
+        "type_name": "int",
+        "tensor_meta": null,
+        "tensor_stats": null,
+        "preview": {
+          "text": "20",
+          "data": 20
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:94522037920808:return",
+        "slot_path": "return",
+        "display_name": "return",
+        "runtime_object_id": 94522037920808,
+        "type_name": "int",
+        "tensor_meta": null,
+        "tensor_stats": null,
+        "preview": {
+          "text": "20",
+          "data": 20
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:94522037920488:arg.x",
+        "slot_path": "arg.x",
+        "display_name": "x",
+        "runtime_object_id": 94522037920488,
+        "type_name": "int",
+        "tensor_meta": null,
+        "tensor_stats": null,
+        "preview": {
+          "text": "10",
+          "data": 10
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:94522037920488:arg.a",
+        "slot_path": "arg.a",
+        "display_name": "a",
+        "runtime_object_id": 94522037920488,
+        "type_name": "int",
+        "tensor_meta": null,
+        "tensor_stats": null,
+        "preview": {
+          "text": "10",
+          "data": 10
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:94522037920520:arg.b",
+        "slot_path": "arg.b",
+        "display_name": "b",
+        "runtime_object_id": 94522037920520,
+        "type_name": "int",
+        "tensor_meta": null,
+        "tensor_stats": null,
+        "preview": {
+          "text": "11",
+          "data": 11
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:94522037920552:arg.c",
+        "slot_path": "arg.c",
+        "display_name": "c",
+        "runtime_object_id": 94522037920552,
+        "type_name": "int",
+        "tensor_meta": null,
+        "tensor_stats": null,
+        "preview": {
+          "text": "12",
+          "data": 12
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:94522037920488:arg.a",
+        "slot_path": "arg.a",
+        "display_name": "a",
+        "runtime_object_id": 94522037920488,
+        "type_name": "int",
+        "tensor_meta": null,
+        "tensor_stats": null,
+        "preview": {
+          "text": "10",
+          "data": 10
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:94522037920520:arg.b",
+        "slot_path": "arg.b",
+        "display_name": "b",
+        "runtime_object_id": 94522037920520,
+        "type_name": "int",
+        "tensor_meta": null,
+        "tensor_stats": null,
+        "preview": {
+          "text": "11",
+          "data": 11
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:94522037920840:return",
+        "slot_path": "return",
+        "display_name": "return",
+        "runtime_object_id": 94522037920840,
+        "type_name": "int",
+        "tensor_meta": null,
+        "tensor_stats": null,
+        "preview": {
+          "text": "21",
+          "data": 21
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": [
+          "call:10"
+        ]
+      },
+      {
+        "id": "var:94522037920840:arg.x",
+        "slot_path": "arg.x",
+        "display_name": "x",
+        "runtime_object_id": 94522037920840,
+        "type_name": "int",
+        "tensor_meta": null,
+        "tensor_stats": null,
+        "preview": {
+          "text": "21",
+          "data": 21
+        },
+        "producer_call_id": "call:9",
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:94522037920552:arg.y",
+        "slot_path": "arg.y",
+        "display_name": "y",
+        "runtime_object_id": 94522037920552,
+        "type_name": "int",
+        "tensor_meta": null,
+        "tensor_stats": null,
+        "preview": {
+          "text": "12",
+          "data": 12
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:94522037928232:return",
+        "slot_path": "return",
+        "display_name": "return",
+        "runtime_object_id": 94522037928232,
+        "type_name": "int",
+        "tensor_meta": null,
+        "tensor_stats": null,
+        "preview": {
+          "text": "252",
+          "data": 252
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:94522037928232:return",
+        "slot_path": "return",
+        "display_name": "return",
+        "runtime_object_id": 94522037928232,
+        "type_name": "int",
+        "tensor_meta": null,
+        "tensor_stats": null,
+        "preview": {
+          "text": "252",
+          "data": 252
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:94522037928232:return",
+        "slot_path": "return",
+        "display_name": "return",
+        "runtime_object_id": 94522037928232,
+        "type_name": "int",
+        "tensor_meta": null,
+        "tensor_stats": null,
+        "preview": {
+          "text": "252",
+          "data": 252
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      },
+      {
+        "id": "var:94522037928232:return",
+        "slot_path": "return",
+        "display_name": "return",
+        "runtime_object_id": 94522037928232,
+        "type_name": "int",
+        "tensor_meta": null,
+        "tensor_stats": null,
+        "preview": {
+          "text": "252",
+          "data": 252
+        },
+        "producer_call_id": null,
+        "consumer_call_ids": []
+      }
+    ],
+    "edges": [
+      {
+        "id": "edge:0",
+        "src_id": "call:0",
+        "dst_id": "call:1",
+        "kind": "call_tree"
+      },
+      {
+        "id": "edge:1",
+        "src_id": "call:1",
+        "dst_id": "call:2",
+        "kind": "call_tree"
+      },
+      {
+        "id": "edge:2",
+        "src_id": "call:1",
+        "dst_id": "call:3",
+        "kind": "call_tree"
+      },
+      {
+        "id": "edge:3",
+        "src_id": "call:1",
+        "dst_id": "call:4",
+        "kind": "call_tree"
+      },
+      {
+        "id": "edge:4",
+        "src_id": "call:4",
+        "dst_id": "call:5",
+        "kind": "call_tree"
+      },
+      {
+        "id": "edge:5",
+        "src_id": "call:4",
+        "dst_id": "call:6",
+        "kind": "call_tree"
+      },
+      {
+        "id": "edge:6",
+        "src_id": "call:1",
+        "dst_id": "call:7",
+        "kind": "call_tree"
+      },
+      {
+        "id": "edge:7",
+        "src_id": "call:7",
+        "dst_id": "call:8",
+        "kind": "call_tree"
+      },
+      {
+        "id": "edge:8",
+        "src_id": "call:8",
+        "dst_id": "call:9",
+        "kind": "call_tree"
+      },
+      {
+        "id": "edge:9",
+        "src_id": "call:8",
+        "dst_id": "call:10",
+        "kind": "call_tree"
+      },
+      {
+        "id": "edge:10",
+        "src_id": "call:5",
+        "dst_id": "call:2",
+        "kind": "dataflow"
+      },
+      {
+        "id": "edge:11",
+        "src_id": "call:5",
+        "dst_id": "call:6",
+        "kind": "dataflow"
+      },
+      {
+        "id": "edge:12",
+        "src_id": "call:9",
+        "dst_id": "call:10",
+        "kind": "dataflow"
+      }
+    ]
+  }
+}

@@ -8,11 +8,14 @@ version = "0.1.0"
 description = "Function-level execution tracer for Python/PyTorch"
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = []
+dependencies = [
+    "fastapi>=0.104.0",
+    "uvicorn[standard]>=0.24.0",
+]
 
 [project.optional-dependencies]
 torch = ["torch"]
-dev = ["pytest>=7.0"]
+dev = ["pytest>=7.0", "pytest-asyncio>=0.21.0"]
 
 [project.scripts]
 vode = "vode.cli:main"

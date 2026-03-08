@@ -36,5 +36,13 @@ htmlcov/
 .DS_Store
 
 # Project specific
-*.json
 *.log
+
+# Node/NPM
+node_modules/
+dist/
+*.bin
+
+# Keep important JSON files, ignore others
+*.local.json
+.env*.local

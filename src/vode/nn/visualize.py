@@ -261,6 +261,74 @@ def _generate_dataflow_graph(
                 if edge.src_id in filtered_nodes and edge.dst_id in filtered_nodes:
                     filtered_edges.append(edge)
 
+            # Rebuild cross-parent connections using Union-Find
+            if target_depth > 0:
+                from vode.nn.graph.builder import Edge
+
+                # Union-Find to find connected components at target depth
+                parent_uf = {}
+
+                def find(x):
+                    if x not in parent_uf:
+                        parent_uf[x] = x
+                    if parent_uf[x] != x:
+                        parent_uf[x] = find(parent_uf[x])
+                    return parent_uf[x]
+
+                def union(x, y):
+                    px, py = find(x), find(y)
+                    if px != py:
+                        parent_uf[px] = py
+
+                # Build connected components from filtered_edges
+                for edge in filtered_edges:
+                    union(edge.src_id, edge.dst_id)
+
+                # Group nodes by component
+                components = {}
+                for node_id in filtered_nodes.keys():
+                    root = find(node_id)
+                    if root not in components:
+                        components[root] = []
+                    components[root].append(node_id)
+
+                if debug:
+                    print(f"[DEBUG] Found {len(components)} connected components")
+
+                # Connect components in sequence
+                comp_list = list(components.keys())
+                for i in range(len(comp_list) - 1):
+                    src_nodes = components[comp_list[i]]
+                    dst_nodes = components[comp_list[i + 1]]
+
+                    last_node = None
+                    for node_id in src_nodes:
+                        has_out = any(e.src_id == node_id for e in filtered_edges)
+                        if not has_out:
+                            last_node = node_id
+                            break
+
+                    first_node = None
+                    for node_id in dst_nodes:
+                        has_in = any(e.dst_id == node_id for e in filtered_edges)
+                        if not has_in:
+                            first_node = node_id
+                            break
+
+                    if last_node and first_node:
+                        exists = any(
+                            e.src_id == last_node and e.dst_id == first_node
+                            for e in filtered_edges
+                        )
+                        if not exists:
+                            filtered_edges.append(
+                                Edge(src_id=last_node, dst_id=first_node)
+                            )
+                            if debug:
+                                print(
+                                    f"[DEBUG] Connected comp {i}->{i+1}: {last_node} -> {first_node}"
+                                )
+
             if debug:
                 print(f"[DEBUG] Filtered edges count: {len(filtered_edges)}")
                 for edge in filtered_edges:

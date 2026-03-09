@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, memo } from 'react';
 import cytoscape from 'cytoscape';
 import dagre from 'cytoscape-dagre';
 import type { GraphData } from '../types/graph';
@@ -11,20 +11,29 @@ interface DataflowViewProps {
     onNodeSelect: (nodeId: string) => void;
 }
 
-export default function DataflowView({ graph, selectedNode, onNodeSelect }: DataflowViewProps) {
+function DataflowView({ graph, selectedNode, onNodeSelect }: DataflowViewProps) {
     const containerRef = useRef<HTMLDivElement>(null);
     const cyRef = useRef<any>(null);
 
     useEffect(() => {
         if (!containerRef.current) return;
 
+        // Limit nodes for performance
+        const MAX_NODES = 50;
+        const nodeEntries = Object.entries(graph.nodes).slice(0, MAX_NODES);
+
         const elements = [
-            ...Object.values(graph.nodes).map(node => ({
-                data: { id: node.id, label: node.function_name }
+            ...nodeEntries.map(([id, node]) => ({
+                data: { id, label: node.function_name }
             })),
-            ...graph.dataflow_edges.map(edge => ({
-                data: { source: edge.from_node, target: edge.to_node }
-            }))
+            ...graph.dataflow_edges
+                .filter(edge =>
+                    nodeEntries.some(([id]) => id === edge.from_node) &&
+                    nodeEntries.some(([id]) => id === edge.to_node)
+                )
+                .map(edge => ({
+                    data: { source: edge.from_node, target: edge.to_node }
+                }))
         ];
 
         cyRef.current = cytoscape({
@@ -75,6 +84,7 @@ export default function DataflowView({ graph, selectedNode, onNodeSelect }: Data
             cyRef.current.getElementById(selectedNode).style('background-color', '#fa8c16');
         }
     }, [selectedNode]);
-
     return <div ref={containerRef} style={{ width: '100%', height: '100%' }} />;
 }
+
+export default memo(DataflowView);

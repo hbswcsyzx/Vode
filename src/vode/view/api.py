@@ -9,22 +9,25 @@ router = APIRouter(prefix="/api")
 
 # Global state to hold loaded graph data
 _graph_data: Optional[Dict[str, Any]] = None
+_frontend_data_cache: Optional[Dict[str, Any]] = None
 
 
 def set_graph_data(data: Dict[str, Any]) -> None:
     """Set the graph data to be served by the API."""
-    global _graph_data
+    global _graph_data, _frontend_data_cache
     _graph_data = data
+    # Pre-convert and cache frontend format
+    _frontend_data_cache = adapt_graph_for_frontend(data)
 
 
 @router.get("/graph")
 async def get_graph() -> Dict[str, Any]:
     """Get complete trace graph data in frontend format."""
-    if _graph_data is None:
+    if _frontend_data_cache is None:
         raise HTTPException(status_code=500, detail="Graph data not loaded")
 
-    # Convert Stage 1 format to frontend format
-    return adapt_graph_for_frontend(_graph_data)
+    # Return cached frontend format
+    return _frontend_data_cache
 
 
 @router.get("/node/{node_id}")

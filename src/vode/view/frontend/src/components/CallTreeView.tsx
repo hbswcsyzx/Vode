@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, memo } from 'react';
 import * as d3 from 'd3';
 import type { GraphData } from '../types/graph';
 
@@ -8,7 +8,7 @@ interface CallTreeViewProps {
     onNodeSelect: (nodeId: string) => void;
 }
 
-export default function CallTreeView({ graph, selectedNode, onNodeSelect }: CallTreeViewProps) {
+function CallTreeView({ graph, selectedNode, onNodeSelect }: CallTreeViewProps) {
     const svgRef = useRef<SVGSVGElement>(null);
 
     useEffect(() => {
@@ -22,20 +22,32 @@ export default function CallTreeView({ graph, selectedNode, onNodeSelect }: Call
         const root = graph.nodes[graph.root_node];
         if (!root) return;
 
+        // Limit rendering depth for performance
+        const MAX_RENDER_DEPTH = 10;
+        const MAX_NODES = 100;
+        let nodeCount = 0;
+
         const buildTree = (nodeId: string, depth = 0, x = 0): any => {
+            if (depth > MAX_RENDER_DEPTH || nodeCount > MAX_NODES) return null;
+
             const node = graph.nodes[nodeId];
+            if (!node) return null;
+
+            nodeCount++;
+
             return {
                 id: nodeId,
                 name: node.function_name,
                 x,
                 y: depth * 80,
-                children: node.children.map((childId, i) =>
-                    buildTree(childId, depth + 1, x + i * 150)
-                )
+                children: node.children
+                    .map((childId, i) => buildTree(childId, depth + 1, x + i * 150))
+                    .filter(Boolean)
             };
         };
 
         const treeData = buildTree(graph.root_node);
+        if (!treeData) return;
 
         const renderNode = (node: any, parentX = 0, parentY = 0) => {
             if (parentX !== 0 || parentY !== 0) {
@@ -73,3 +85,5 @@ export default function CallTreeView({ graph, selectedNode, onNodeSelect }: Call
 
     return <svg ref={svgRef} style={{ width: '100%', height: '100%', background: 'white' }} />;
 }
+
+export default memo(CallTreeView);

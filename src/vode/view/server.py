@@ -100,6 +100,7 @@ class ViewServer:
     def load_trace(self) -> None:
         """Load and parse trace JSON file."""
         logger.info(f"Loading trace file: {self.trace_file}")
+        print("Loading and converting trace data...")
 
         if not self.trace_file.exists():
             raise FileNotFoundError(f"Trace file not found: {self.trace_file}")
@@ -107,10 +108,11 @@ class ViewServer:
         with open(self.trace_file, "r") as f:
             self.graph_data = json.load(f)
 
-        # Set graph data in API module
+        # Set graph data in API module (this will pre-convert and cache)
         set_graph_data(self.graph_data)
 
-        logger.info("Trace file loaded successfully")
+        logger.info("Trace file loaded and converted successfully")
+        print("✓ Trace data loaded and cached")
 
     def run(self, open_browser: bool = True) -> None:
         """Start the server and optionally open browser.

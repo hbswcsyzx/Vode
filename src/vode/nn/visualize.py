@@ -24,6 +24,7 @@ def visualize_model(
     format: Literal["svg", "png", "pdf", "gv"] = "svg",
     graph_type: Literal["structure", "dataflow", "both"] = "both",
     depth_limit: int | None = None,
+    debug: bool = False,
 ) -> dict[str, str]:
     """Visualize a PyTorch model's structure and/or dataflow.
 
@@ -37,7 +38,9 @@ def visualize_model(
         save_path: Base path for output files (without extension)
         format: Output format - 'svg', 'png', 'pdf', or 'gv' (Graphviz source only)
         graph_type: Which graph(s) to generate - 'structure', 'dataflow', or 'both'
-        depth_limit: Maximum depth to visualize (None = all levels). Not yet implemented.
+        depth_limit: Depth level to visualize (None = deepest level). When None, shows
+            the maximum depth level across all branches. When set to N, shows level N.
+        debug: Enable debug output showing edge creation process
 
     Returns:
         Dictionary mapping graph type to output file path.
@@ -137,6 +140,7 @@ def visualize_model(
             writer=writer,
             renderer=renderer,
             depth_limit=depth_limit,
+            debug=debug,
         )
         result_paths["dataflow"] = dataflow_path
 
@@ -194,6 +198,7 @@ def _generate_dataflow_graph(
     writer: GraphvizWriter,
     renderer: StaticRenderer | None,
     depth_limit: int | None,
+    debug: bool = False,
 ) -> str:
     """Generate dataflow graph for a model.
 
@@ -204,7 +209,7 @@ def _generate_dataflow_graph(
         format: Output format
         writer: GraphvizWriter instance
         renderer: StaticRenderer instance (or None if format='gv')
-        depth_limit: Maximum depth to visualize (not yet implemented)
+        depth_limit: Depth level to visualize (None = deepest level)
 
     Returns:
         Path to generated file
@@ -217,80 +222,150 @@ def _generate_dataflow_graph(
         output = model(wrapped_input)
         graph = capture.get_graph()
 
-        # Filter by depth - show only the deepest level by default
-        if depth_limit is None:
-            # Find the maximum depth
-            all_nodes = graph.get_nodes()
-            if all_nodes:
-                max_depth = max(node.depth for node in all_nodes)
-                # Keep only nodes at max depth, plus input/output tensors
-                from vode.nn.graph.nodes import TensorNode, ModuleNode
+        # Filter by depth - show only one hierarchy level at a time
+        from vode.nn.graph.nodes import TensorNode, ModuleNode
 
-                filtered_nodes = {}
-                filtered_edges = []
-
-                for node in all_nodes:
-                    if isinstance(node, TensorNode) and node.name in [
-                        "input",
-                        "output",
-                    ]:
-                        # Keep input/output tensors
-                        filtered_nodes[node.node_id] = node
-                    elif isinstance(node, ModuleNode) and node.depth == max_depth:
-                        # Keep modules at max depth
-                        filtered_nodes[node.node_id] = node
-
-                # Keep only edges between filtered nodes
-                for edge in graph.get_edges():
-                    if edge.src_id in filtered_nodes and edge.dst_id in filtered_nodes:
-                        filtered_edges.append(edge)
-
-                # Replace graph nodes and edges
-                graph.nodes = filtered_nodes
-                graph.edges = filtered_edges
+        all_nodes = graph.get_nodes()
+        if not all_nodes:
+            pass  # Empty graph, nothing to filter
         else:
-            # Filter by specified depth
-            from vode.nn.graph.nodes import TensorNode, ModuleNode
+            if debug:
+                print(f"[DEBUG] Initial edges count: {len(graph.edges)}")
+                for edge in graph.edges:
+                    print(f"[DEBUG]   {edge.src_id} -> {edge.dst_id}")
 
+            # Determine target depth
+            if depth_limit is None:
+                # Find max depth for each branch and show deepest level
+                module_nodes = [n for n in all_nodes if isinstance(n, ModuleNode)]
+                if module_nodes:
+                    # Get max depth across all modules
+                    target_depth = max(node.depth for node in module_nodes)
+                else:
+                    target_depth = 0
+            else:
+                target_depth = depth_limit
+
+            # Filter nodes: keep only modules at target depth
             filtered_nodes = {}
+            for node in all_nodes:
+                if isinstance(node, ModuleNode) and node.depth == target_depth:
+                    # Clear parent-child relationships to avoid edge duplication
+                    node.parents = []
+                    node.children = []
+                    filtered_nodes[node.node_id] = node
+
+            # Filter edges: keep only edges between modules at target depth
             filtered_edges = []
-
-            for node in graph.get_nodes():
-                if isinstance(node, TensorNode) and node.name in ["input", "output"]:
-                    filtered_nodes[node.node_id] = node
-                elif isinstance(node, ModuleNode) and node.depth == depth_limit:
-                    filtered_nodes[node.node_id] = node
-
             for edge in graph.get_edges():
                 if edge.src_id in filtered_nodes and edge.dst_id in filtered_nodes:
                     filtered_edges.append(edge)
 
+            if debug:
+                print(f"[DEBUG] Filtered edges count: {len(filtered_edges)}")
+                for edge in filtered_edges:
+                    print(f"[DEBUG]   {edge.src_id} -> {edge.dst_id}")
+
+            # Replace graph nodes and edges
             graph.nodes = filtered_nodes
             graph.edges = filtered_edges
 
-        # Add final output tensor node
-        from vode.nn.graph.nodes import TensorNode
+            # Add Input and Output nodes
+            if filtered_nodes:
+                # Get module IDs BEFORE adding Input/Output nodes
+                module_ids = list(filtered_nodes.keys())
 
-        if isinstance(output, torch.Tensor):
-            output_node_id = f"tensor_output_{id(output)}"
-            output_node = TensorNode(
-                node_id=output_node_id,
-                name="output",
-                depth=0,
-                tensor_id=str(id(output)),
-                shape=tuple(torch.Tensor.size(output)),
-                dtype=str(torch.Tensor.dtype.__get__(output)).replace("torch.", ""),
-                device=str(torch.Tensor.device.__get__(output)),
-            )
-            try:
-                graph.add_node(output_node)
-                # Connect last module to output
-                if hasattr(output, "parent_module_node"):
-                    parent_id = output.parent_module_node.node_id
-                    if parent_id in graph.nodes:
-                        graph.add_edge(src_id=parent_id, dst_id=output_node_id)
-            except (ValueError, AttributeError):
-                pass
+                # Get input shape from wrapped_input
+                if isinstance(wrapped_input, torch.Tensor):
+                    input_shape = tuple(torch.Tensor.size(wrapped_input))
+                    input_dtype = str(
+                        torch.Tensor.dtype.__get__(wrapped_input)
+                    ).replace("torch.", "")
+                    input_device = str(torch.Tensor.device.__get__(wrapped_input))
+                else:
+                    input_shape = None
+                    input_dtype = "unknown"
+                    input_device = "unknown"
+
+                # Get output shape from output
+                if isinstance(output, torch.Tensor):
+                    output_shape = tuple(torch.Tensor.size(output))
+                    output_dtype = str(torch.Tensor.dtype.__get__(output)).replace(
+                        "torch.", ""
+                    )
+                    output_device = str(torch.Tensor.device.__get__(output))
+                else:
+                    output_shape = None
+                    output_dtype = "unknown"
+                    output_device = "unknown"
+
+                # Create Input node
+                input_node = TensorNode(
+                    node_id="input_tensor",
+                    name="Input",
+                    depth=-1,
+                    tensor_id="input",
+                    shape=input_shape,
+                    dtype=input_dtype,
+                    device=input_device,
+                )
+                graph.nodes["input_tensor"] = input_node
+
+                # Create Output node
+                output_node = TensorNode(
+                    node_id="output_tensor",
+                    name="Output",
+                    depth=-1,
+                    tensor_id="output",
+                    shape=output_shape,
+                    dtype=output_dtype,
+                    device=output_device,
+                )
+                graph.nodes["output_tensor"] = output_node
+
+                # Find first and last module nodes based on edges
+                # Use saved module_ids (before Input/Output were added)
+                if module_ids:
+                    # Find nodes with no incoming edges (first nodes)
+                    nodes_with_incoming = {edge.dst_id for edge in filtered_edges}
+                    first_nodes = [
+                        nid for nid in module_ids if nid not in nodes_with_incoming
+                    ]
+
+                    # Find nodes with no outgoing edges (last nodes)
+                    nodes_with_outgoing = {edge.src_id for edge in filtered_edges}
+                    last_nodes = [
+                        nid for nid in module_ids if nid not in nodes_with_outgoing
+                    ]
+
+                    if debug:
+                        print(f"[DEBUG] module_ids: {module_ids}")
+                        print(f"[DEBUG] first_nodes: {first_nodes}")
+                        print(f"[DEBUG] last_nodes: {last_nodes}")
+
+                    # Create new edges list with Input/Output connections
+                    from vode.nn.graph.builder import Edge
+
+                    new_edges = list(filtered_edges)
+
+                    # Connect Input to first nodes
+                    for first_node_id in first_nodes:
+                        new_edges.append(
+                            Edge(src_id="input_tensor", dst_id=first_node_id)
+                        )
+
+                    # Connect last nodes to Output
+                    for last_node_id in last_nodes:
+                        new_edges.append(
+                            Edge(src_id=last_node_id, dst_id="output_tensor")
+                        )
+
+                    if debug:
+                        print(f"[DEBUG] Final edges count: {len(new_edges)}")
+                        for edge in new_edges:
+                            print(f"[DEBUG]   {edge.src_id} -> {edge.dst_id}")
+
+                    graph.edges = new_edges
 
     # Write to .gv file
     gv_path = f"{save_path}_dataflow.gv"

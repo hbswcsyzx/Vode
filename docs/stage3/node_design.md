@@ -52,8 +52,7 @@ Low-level nodes represent atomic PyTorch operations with concrete tensor shapes.
 ```
 ┌──────────┬──────────┬──────────┐
 │  input   │  ReLU    │  output  │
-│    ●     │ depth: 3 │    ●     │
-│ (1,3,64) │          │ (1,3,64) │
+│ (1,3,64) │ depth: 3 │ (1,3,64) │
 └──────────┴──────────┴──────────┘
 ```
 
@@ -209,19 +208,19 @@ interface TensorInfo {
 │ Conv2d (depth: 3)               │
 ├─────────────────────────────────┤
 │ Input:                          │
-│   x: (1, 3, 224, 224)          │
+│   x: (1, 3, 224, 224)           │
 │   dtype: float32                │
 │   device: cuda:0                │
-│   min: -2.117, max: 2.640      │
-│   mean: 0.485, std: 0.229      │
-│   sample: [0.123, 0.456, ...]  │
+│   min: -2.117, max: 2.640       │
+│   mean: 0.485, std: 0.229       │
+│   sample: [0.123, 0.456, ...]   │
 │                                 │
 │ Output:                         │
-│   out: (1, 32, 224, 224)       │
+│   out: (1, 32, 224, 224)        │
 │   dtype: float32                │
 │   device: cuda:0                │
-│   min: -1.234, max: 3.456      │
-│   mean: 0.123, std: 0.567      │
+│   min: -1.234, max: 3.456       │
+│   mean: 0.123, std: 0.567       │
 └─────────────────────────────────┘
 ```
 
@@ -338,3 +337,4 @@ VODE's node design prioritizes:
 - **Clear separation** between low-level (with shapes) and high-level (without shapes)
 - **Interactive inspection** for detailed information
 - **Extensibility** for future enhancements
+- **NO ● displayed to user**

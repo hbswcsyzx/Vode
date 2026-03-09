@@ -214,13 +214,83 @@ def _generate_dataflow_graph(
 
     # Capture dataflow
     with DataflowCapture(model) as capture:
-        _ = model(wrapped_input)
+        output = model(wrapped_input)
         graph = capture.get_graph()
 
-    # TODO: Apply depth_limit filtering if specified
-    if depth_limit is not None:
-        # Filter nodes by depth
-        pass
+        # Filter by depth - show only the deepest level by default
+        if depth_limit is None:
+            # Find the maximum depth
+            all_nodes = graph.get_nodes()
+            if all_nodes:
+                max_depth = max(node.depth for node in all_nodes)
+                # Keep only nodes at max depth, plus input/output tensors
+                from vode.nn.graph.nodes import TensorNode, ModuleNode
+
+                filtered_nodes = {}
+                filtered_edges = []
+
+                for node in all_nodes:
+                    if isinstance(node, TensorNode) and node.name in [
+                        "input",
+                        "output",
+                    ]:
+                        # Keep input/output tensors
+                        filtered_nodes[node.node_id] = node
+                    elif isinstance(node, ModuleNode) and node.depth == max_depth:
+                        # Keep modules at max depth
+                        filtered_nodes[node.node_id] = node
+
+                # Keep only edges between filtered nodes
+                for edge in graph.get_edges():
+                    if edge.src_id in filtered_nodes and edge.dst_id in filtered_nodes:
+                        filtered_edges.append(edge)
+
+                # Replace graph nodes and edges
+                graph.nodes = filtered_nodes
+                graph.edges = filtered_edges
+        else:
+            # Filter by specified depth
+            from vode.nn.graph.nodes import TensorNode, ModuleNode
+
+            filtered_nodes = {}
+            filtered_edges = []
+
+            for node in graph.get_nodes():
+                if isinstance(node, TensorNode) and node.name in ["input", "output"]:
+                    filtered_nodes[node.node_id] = node
+                elif isinstance(node, ModuleNode) and node.depth == depth_limit:
+                    filtered_nodes[node.node_id] = node
+
+            for edge in graph.get_edges():
+                if edge.src_id in filtered_nodes and edge.dst_id in filtered_nodes:
+                    filtered_edges.append(edge)
+
+            graph.nodes = filtered_nodes
+            graph.edges = filtered_edges
+
+        # Add final output tensor node
+        from vode.nn.graph.nodes import TensorNode
+
+        if isinstance(output, torch.Tensor):
+            output_node_id = f"tensor_output_{id(output)}"
+            output_node = TensorNode(
+                node_id=output_node_id,
+                name="output",
+                depth=0,
+                tensor_id=str(id(output)),
+                shape=tuple(torch.Tensor.size(output)),
+                dtype=str(torch.Tensor.dtype.__get__(output)).replace("torch.", ""),
+                device=str(torch.Tensor.device.__get__(output)),
+            )
+            try:
+                graph.add_node(output_node)
+                # Connect last module to output
+                if hasattr(output, "parent_module_node"):
+                    parent_id = output.parent_module_node.node_id
+                    if parent_id in graph.nodes:
+                        graph.add_edge(src_id=parent_id, dst_id=output_node_id)
+            except (ValueError, AttributeError):
+                pass
 
     # Write to .gv file
     gv_path = f"{save_path}_dataflow.gv"

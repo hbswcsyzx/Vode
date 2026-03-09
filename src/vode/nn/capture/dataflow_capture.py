@@ -109,16 +109,45 @@ class DataflowCapture:
             input_nodes = _collect_tensor_nodes([args, kwargs])
             input_tensors = _collect_recorder_tensors([args, kwargs])
 
+            # If we have RecorderTensors without nodes, create initial nodes
+            if input_tensors and not input_nodes:
+                for rec_tensor in input_tensors:
+                    if (
+                        not hasattr(rec_tensor, "tensor_nodes")
+                        or not rec_tensor.tensor_nodes
+                    ):
+                        # Create initial input TensorNode
+                        tensor_node_id = f"tensor_input_{id(rec_tensor)}"
+                        tensor_node = TensorNode(
+                            node_id=tensor_node_id,
+                            name="input",
+                            depth=0,
+                            tensor_id=str(id(rec_tensor)),
+                            shape=tuple(torch.Tensor.size(rec_tensor)),
+                            dtype=str(torch.Tensor.dtype.__get__(rec_tensor)).replace(
+                                "torch.", ""
+                            ),
+                            device=str(torch.Tensor.device.__get__(rec_tensor)),
+                        )
+                        # Add to graph
+                        try:
+                            self.graph.add_node(tensor_node)
+                        except ValueError:
+                            pass
+                        # Attach to RecorderTensor
+                        rec_tensor.tensor_nodes = [tensor_node]
+                        input_nodes.append(tensor_node)
+
             # If no RecorderTensor inputs, just call original
             if not input_nodes:
                 return self._orig_call(module, *args, **kwargs)
 
-            # Determine depth from input nodes
-            cur_depth = input_nodes[0].depth if input_nodes else self.current_depth
+            # Use current_depth for module depth (tracks nesting level)
+            cur_depth = self.current_depth
 
             # Create ModuleNode for this module
             module_type = type(module).__name__
-            module_node_id = f"module_{module_type}_{id(module)}"
+            module_node_id = f"module_{module_type}_{id(module)}_{cur_depth}"
 
             module_node = ModuleNode(
                 node_id=module_node_id,
@@ -141,11 +170,22 @@ class DataflowCapture:
             for input_node in input_nodes:
                 try:
                     self.graph.add_edge(
-                        src_id=input_node.node_id, dst_id=module_node_id, label="input"
+                        src_id=input_node.node_id, dst_id=module_node_id
                     )
                 except ValueError:
                     # Edge or node doesn't exist, skip
                     pass
+
+            # Also check if inputs have parent modules (for module-to-module connections)
+            for rec_tensor in input_tensors:
+                if hasattr(rec_tensor, "parent_module_node"):
+                    try:
+                        self.graph.add_edge(
+                            src_id=rec_tensor.parent_module_node.node_id,
+                            dst_id=module_node_id,
+                        )
+                    except ValueError:
+                        pass
 
             # Update depth for nested calls
             prev_depth = self.current_depth
@@ -267,63 +307,17 @@ def _wrap_as_recorder_tensors(
         Data with tensors wrapped as RecorderTensors
     """
     if isinstance(data, torch.Tensor) and not isinstance(data, RecorderTensor):
-        # Convert to RecorderTensor
+        # Convert to RecorderTensor but DON'T create intermediate tensor nodes
         rec_tensor = data.as_subclass(RecorderTensor)
 
-        # Create TensorNode
-        tensor_node_id = f"tensor_{id(rec_tensor)}"
-        tensor_node = TensorNode(
-            node_id=tensor_node_id,
-            name="output_tensor",
-            depth=depth,
-            tensor_id=str(id(rec_tensor)),
-            shape=tuple(torch.Tensor.size(rec_tensor)),
-            dtype=str(torch.Tensor.dtype.__get__(rec_tensor)).replace("torch.", ""),
-            device=str(torch.Tensor.device.__get__(rec_tensor)),
-        )
-
-        # Add to graph
-        try:
-            graph.add_node(tensor_node)
-            graph.add_edge(
-                src_id=parent_module_node.node_id, dst_id=tensor_node_id, label="output"
-            )
-        except ValueError:
-            # Node or edge already exists
-            pass
-
-        # Attach tensor node
-        rec_tensor.tensor_nodes = [tensor_node]
+        # Just attach the parent module node info for tracking
+        rec_tensor.tensor_nodes = []
+        rec_tensor.parent_module_node = parent_module_node
         return rec_tensor
 
     elif isinstance(data, RecorderTensor):
-        # Already a RecorderTensor, create new node
-        tensor_node_id = f"tensor_{id(data)}_out"
-        tensor_node = TensorNode(
-            node_id=tensor_node_id,
-            name="output_tensor",
-            depth=depth,
-            tensor_id=str(id(data)),
-            shape=tuple(torch.Tensor.size(data)),
-            dtype=str(torch.Tensor.dtype.__get__(data)).replace("torch.", ""),
-            device=str(torch.Tensor.device.__get__(data)),
-        )
-
-        # Add to graph
-        try:
-            graph.add_node(tensor_node)
-            graph.add_edge(
-                src_id=parent_module_node.node_id, dst_id=tensor_node_id, label="output"
-            )
-        except ValueError:
-            # Node or edge already exists
-            pass
-
-        # Append tensor node
-        if hasattr(data, "tensor_nodes"):
-            data.tensor_nodes.append(tensor_node)
-        else:
-            data.tensor_nodes = [tensor_node]
+        # Already a RecorderTensor, just update parent tracking
+        data.parent_module_node = parent_module_node
         return data
 
     elif isinstance(data, Mapping):

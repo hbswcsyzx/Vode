@@ -30,6 +30,20 @@ class GraphvizWriter:
         """Initialize the Graphviz writer."""
         pass
 
+    def _sanitize_node_id(self, node_id: str) -> str:
+        """Sanitize node ID to only contain valid Graphviz characters.
+
+        Args:
+            node_id: Original node ID
+
+        Returns:
+            Sanitized node ID with only alphanumeric and underscores
+        """
+        # Replace invalid characters with underscores
+        sanitized = node_id.replace(".", "_").replace("/", "_").replace("-", "_")
+        sanitized = "".join(c if c.isalnum() or c == "_" else "_" for c in sanitized)
+        return sanitized
+
     def write_structure_graph(self, graph: StructureGraph, output_path: str) -> None:
         """Write a structure graph to a Graphviz .gv file.
 
@@ -45,9 +59,9 @@ class GraphvizWriter:
         output_path_obj.parent.mkdir(parents=True, exist_ok=True)
 
         with open(output_path, "w", encoding="utf-8") as f:
-            # Write graph header
+            # Write graph header - let Graphviz auto-size
             f.write("strict digraph StructureGraph {\n")
-            f.write('    graph [ordering=in rankdir=LR size="20,20"]\n')
+            f.write("    graph [ordering=in rankdir=LR]\n")
             f.write("    node [style=filled shape=plaintext fontsize=10]\n")
             f.write("    edge [fontsize=10]\n\n")
 
@@ -77,9 +91,9 @@ class GraphvizWriter:
         output_path_obj.parent.mkdir(parents=True, exist_ok=True)
 
         with open(output_path, "w", encoding="utf-8") as f:
-            # Write graph header
+            # Write graph header - let Graphviz auto-size
             f.write("strict digraph DataflowGraph {\n")
-            f.write('    graph [ordering=in rankdir=LR size="20,20"]\n')
+            f.write('    graph [ordering=in rankdir=LR]\n')
             f.write("    node [style=filled shape=plaintext fontsize=10]\n")
             f.write("    edge [fontsize=10]\n\n")
 
@@ -118,12 +132,15 @@ class GraphvizWriter:
             f: File object to write to
             node: TensorNode object
         """
+        # Sanitize node ID
+        sanitized_id = self._sanitize_node_id(node.node_id)
+
         # Build label
         name = self._escape_html(node.name)
         shape_str = str(node.shape) if node.shape else "unknown"
 
         label = f"""<
-        <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+        <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6">
         <TR><TD>{name}<BR/>{shape_str}</TD></TR>
         </TABLE>
     >"""
@@ -145,8 +162,8 @@ class GraphvizWriter:
             stats_json = json.dumps(node.stats)
             attrs.append(f'vode_stats="{self._escape_attr(stats_json)}"')
 
-        # Write node
-        f.write(f"    {node.node_id} [label={label} {' '.join(attrs)}]\n")
+        # Write node with sanitized ID
+        f.write(f"    {sanitized_id} [label={label} {' '.join(attrs)}]\n")
 
     def _write_module_node(self, f, node: ModuleNode) -> None:
         """Write a ModuleNode with HTML table format (INPUT | OP | OUTPUT).
@@ -155,18 +172,8 @@ class GraphvizWriter:
             f: File object to write to
             node: ModuleNode object
         """
-        # Build input/output port symbols
-        num_inputs = len(node.input_shapes) if node.input_shapes else 1
-        num_outputs = len(node.output_shapes) if node.output_shapes else 1
-
-        input_ports = "".join(["●<BR/>" for _ in range(num_inputs)])
-        output_ports = "".join(["●<BR/>" for _ in range(num_outputs)])
-
-        # Remove trailing <BR/>
-        if input_ports:
-            input_ports = input_ports[:-5]
-        if output_ports:
-            output_ports = output_ports[:-5]
+        # Sanitize node ID
+        sanitized_id = self._sanitize_node_id(node.node_id)
 
         # Build operation info
         op_name = self._escape_html(node.module_type or node.name)
@@ -178,44 +185,23 @@ class GraphvizWriter:
 
         if node.input_shapes:
             if len(node.input_shapes) == 1:
-                input_shape_str = f"in: {node.input_shapes[0]}"
+                input_shape_str = str(node.input_shapes[0])
             else:
-                input_shape_str = f"in: {len(node.input_shapes)} tensors"
+                input_shape_str = f"{len(node.input_shapes)}x"
 
         if node.output_shapes:
             if len(node.output_shapes) == 1:
-                output_shape_str = f"out: {node.output_shapes[0]}"
+                output_shape_str = str(node.output_shapes[0])
             else:
-                output_shape_str = f"out: {len(node.output_shapes)} tensors"
+                output_shape_str = f"{len(node.output_shapes)}x"
 
-        # Build HTML label
-        if input_ports or output_ports:
-            # With port symbols
-            label = f"""<
-        <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+        # Build HTML label - simple 3-column layout per spec
+        label = f"""<
+        <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6">
         <TR>
-            <TD ROWSPAN="2" BGCOLOR="#E8E8E8">{input_ports if input_ports else ""}</TD>
-            <TD COLSPAN="2">{op_info}</TD>
-            <TD ROWSPAN="2" BGCOLOR="#E8E8E8">{output_ports if output_ports else ""}</TD>
-        </TR>
-        <TR>
-            <TD>{input_shape_str}</TD>
-            <TD>{output_shape_str}</TD>
-        </TR>
-        </TABLE>
-    >"""
-        else:
-            # Without port symbols (fallback)
-            label = f"""<
-        <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
-        <TR>
-            <TD ROWSPAN="2" BGCOLOR="#E8E8E8">INPUT</TD>
-            <TD COLSPAN="2">{op_info}</TD>
-            <TD ROWSPAN="2" BGCOLOR="#E8E8E8">OUTPUT</TD>
-        </TR>
-        <TR>
-            <TD>{input_shape_str}</TD>
-            <TD>{output_shape_str}</TD>
+            <TD BGCOLOR="#F0F0F0">input<BR/>{input_shape_str}</TD>
+            <TD>{op_info}</TD>
+            <TD BGCOLOR="#F0F0F0">output<BR/>{output_shape_str}</TD>
         </TR>
         </TABLE>
     >"""
@@ -239,8 +225,8 @@ class GraphvizWriter:
             params_json = json.dumps(node.params)
             attrs.append(f'vode_params="{self._escape_attr(params_json)}"')
 
-        # Write node
-        f.write(f"    {node.node_id} [label={label} {' '.join(attrs)}]\n")
+        # Write node with sanitized ID
+        f.write(f"    {sanitized_id} [label={label} {' '.join(attrs)}]\n")
 
     def _write_function_node(self, f, node: FunctionNode) -> None:
         """Write a FunctionNode with HTML table format (INPUT | OP | OUTPUT).
@@ -249,18 +235,8 @@ class GraphvizWriter:
             f: File object to write to
             node: FunctionNode object
         """
-        # Build input/output port symbols
-        num_inputs = len(node.input_shapes) if node.input_shapes else 1
-        num_outputs = len(node.output_shapes) if node.output_shapes else 1
-
-        input_ports = "".join(["●<BR/>" for _ in range(num_inputs)])
-        output_ports = "".join(["●<BR/>" for _ in range(num_outputs)])
-
-        # Remove trailing <BR/>
-        if input_ports:
-            input_ports = input_ports[:-5]
-        if output_ports:
-            output_ports = output_ports[:-5]
+        # Sanitize node ID
+        sanitized_id = self._sanitize_node_id(node.node_id)
 
         # Build operation info
         op_name = self._escape_html(node.func_name or node.name)
@@ -272,44 +248,23 @@ class GraphvizWriter:
 
         if node.input_shapes:
             if len(node.input_shapes) == 1:
-                input_shape_str = f"in: {node.input_shapes[0]}"
+                input_shape_str = str(node.input_shapes[0])
             else:
-                input_shape_str = f"in: {len(node.input_shapes)} tensors"
+                input_shape_str = f"{len(node.input_shapes)}x"
 
         if node.output_shapes:
             if len(node.output_shapes) == 1:
-                output_shape_str = f"out: {node.output_shapes[0]}"
+                output_shape_str = str(node.output_shapes[0])
             else:
-                output_shape_str = f"out: {len(node.output_shapes)} tensors"
+                output_shape_str = f"{len(node.output_shapes)}x"
 
-        # Build HTML label
-        if input_ports or output_ports:
-            # With port symbols
-            label = f"""<
-        <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+        # Build HTML label - simple 3-column layout per spec
+        label = f"""<
+        <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6">
         <TR>
-            <TD ROWSPAN="2" BGCOLOR="#E8E8E8">{input_ports if input_ports else ""}</TD>
-            <TD COLSPAN="2">{op_info}</TD>
-            <TD ROWSPAN="2" BGCOLOR="#E8E8E8">{output_ports if output_ports else ""}</TD>
-        </TR>
-        <TR>
-            <TD>{input_shape_str}</TD>
-            <TD>{output_shape_str}</TD>
-        </TR>
-        </TABLE>
-    >"""
-        else:
-            # Without port symbols (fallback)
-            label = f"""<
-        <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
-        <TR>
-            <TD ROWSPAN="2" BGCOLOR="#E8E8E8">INPUT</TD>
-            <TD COLSPAN="2">{op_info}</TD>
-            <TD ROWSPAN="2" BGCOLOR="#E8E8E8">OUTPUT</TD>
-        </TR>
-        <TR>
-            <TD>{input_shape_str}</TD>
-            <TD>{output_shape_str}</TD>
+            <TD BGCOLOR="#F0F0F0">input<BR/>{input_shape_str}</TD>
+            <TD>{op_info}</TD>
+            <TD BGCOLOR="#F0F0F0">output<BR/>{output_shape_str}</TD>
         </TR>
         </TABLE>
     >"""
@@ -333,8 +288,8 @@ class GraphvizWriter:
             metadata_json = json.dumps(node.metadata)
             attrs.append(f'vode_metadata="{self._escape_attr(metadata_json)}"')
 
-        # Write node
-        f.write(f"    {node.node_id} [label={label} {' '.join(attrs)}]\n")
+        # Write node with sanitized ID
+        f.write(f"    {sanitized_id} [label={label} {' '.join(attrs)}]\n")
 
     def _write_generic_node(self, f, node) -> None:
         """Write a generic Node (fallback).
@@ -343,6 +298,9 @@ class GraphvizWriter:
             f: File object to write to
             node: Node object
         """
+        # Sanitize node ID
+        sanitized_id = self._sanitize_node_id(node.node_id)
+
         name = self._escape_html(node.name)
         label = f'"{name}\\ndepth: {node.depth}"'
 
@@ -350,7 +308,7 @@ class GraphvizWriter:
         attrs.append('vode_type="generic"')
         attrs.append(f'vode_depth="{node.depth}"')
 
-        f.write(f"    {node.node_id} [label={label} {' '.join(attrs)}]\n")
+        f.write(f"    {sanitized_id} [label={label} {' '.join(attrs)}]\n")
 
     def _write_edge(self, f, edge) -> None:
         """Write a single edge to the file.
@@ -359,11 +317,12 @@ class GraphvizWriter:
             f: File object to write to
             edge: Edge object
         """
-        if edge.label:
-            label = self._escape_attr(edge.label)
-            f.write(f'    {edge.src_id} -> {edge.dst_id} [label="{label}"]\n')
-        else:
-            f.write(f"    {edge.src_id} -> {edge.dst_id}\n")
+        # Sanitize node IDs
+        sanitized_src = self._sanitize_node_id(edge.src_id)
+        sanitized_dst = self._sanitize_node_id(edge.dst_id)
+
+        # Write edge without label for cleaner structure graphs
+        f.write(f"    {sanitized_src} -> {sanitized_dst}\n")
 
     def _escape_html(self, text: str) -> str:
         """Escape HTML special characters for use in HTML labels.

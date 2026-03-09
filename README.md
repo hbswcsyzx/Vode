@@ -1,23 +1,34 @@
-# Vode
+# VODE
 
-A lightweight function-level execution tracing and visualization tool for Python.
+A comprehensive visualization and debugging tool for Python execution and PyTorch neural networks.
 
 ## Overview
 
-Vode captures function call trees, parameters, return values, and dataflow relationships during Python program execution. It's designed for debugging, understanding code flow, and visualizing execution patterns.
+VODE provides two powerful capabilities:
 
-**Current Status**: Stage 2 (Web Viewer) - ✅ Complete
+- **Execution Tracing**: Capture and visualize function call trees for any Python code
+- **Neural Network Visualization**: Dual-graph visualization of PyTorch model architecture and dataflow
 
 ## Features
 
-- ✅ **Zero-code modification tracing** using `sys.settrace()`
-- ✅ **Function call tree capture** with parent-child relationships
-- ✅ **Parameter and return value recording** with configurable policies
-- ✅ **Dataflow edge resolution** by object ID matching
-- ✅ **PyTorch tensor support** with shape/dtype/device/stats extraction
-- ✅ **JSON serialization** for persistence
-- ✅ **Text rendering** for quick inspection
-- ✅ **Web visualization** with interactive call tree and dataflow views
+### Execution Tracing
+
+- Zero-code modification tracing using `sys.settrace()`
+- Function call tree capture with parent-child relationships
+- Parameter and return value recording
+- Dataflow edge resolution by object ID matching
+- PyTorch tensor metadata extraction (shape, dtype, device, stats)
+- Interactive web visualization
+
+### Neural Network Visualization
+
+- **Dual-graph architecture**: Separate structure and dataflow graphs
+- **Structure graph**: Captures model architecture during initialization
+- **Dataflow graph**: Captures tensor operations during forward pass
+- **Horizontal layout**: INPUT-OP-OUTPUT node design for clear dataflow
+- **Interactive inspection**: Click nodes to view detailed tensor statistics
+- **Multiple formats**: Export to SVG, PNG, PDF, or view in browser
+- **Graphviz storage**: Extensible .gv format for custom processing
 
 ## Installation
 
@@ -28,11 +39,11 @@ cd vode
 pip install -e .
 ```
 
-**Optional**: Install PyTorch for tensor tracing support.
+**Optional**: Install PyTorch for neural network visualization.
 
 ## Quick Start
 
-### CLI Usage
+### Function Tracing
 
 ```bash
 # Trace a Python script
@@ -62,67 +73,31 @@ graph = runtime.stop()
 # Render as text
 from vode.trace.renderer import TextRenderer
 print(TextRenderer().render(graph))
-
-# Serialize to JSON
-from vode.trace.serializer import GraphSerializer
-json_data = GraphSerializer().serialize(graph)
 ```
 
-## Example
+### Neural Network Visualization
 
 ```python
-# example.py
-def add(a, b):
-    return a + b
+from vode.nn import visualize_model
+import torch
+import torch.nn as nn
 
-def multiply(a, b):
-    return a * b
+# Define your model
+model = nn.Sequential(
+    nn.Conv2d(3, 64, 3),
+    nn.ReLU(),
+    nn.Linear(64, 10)
+)
 
-def compute(x, y):
-    sum_val = add(x, y)
-    prod_val = multiply(x, y)
-    return sum_val, prod_val
-
-if __name__ == '__main__':
-    result = compute(3, 4)
-    print(f"Result: {result}")
+# Visualize
+input_data = torch.randn(1, 3, 224, 224)
+visualize_model(
+    model, 
+    input_data,
+    save_path='model_viz',
+    format='svg'  # or 'png', 'pdf', 'web'
+)
 ```
-
-Run with tracing:
-
-```bash
-vode trace example.py
-```
-
-Output:
-
-```
-Result: (7, 12)
-Trace saved to: trace.json
-Summary:
-  Function calls: 4
-  Total edges: 3
-  Dataflow edges: 0
-```
-
-## What Vode Can Do
-
-- Trace function calls at any depth
-- Capture parameters and return values
-- Track dataflow between functions
-- Extract PyTorch tensor metadata (shape, dtype, device, stats)
-- Filter by depth and module patterns
-- Serialize traces to JSON
-- Render call trees as text
-
-See [`docs/stage1/capabilities.md`](docs/stage1/capabilities.md) for details.
-
-## What Vode Cannot Do
-
-- Cannot trace intra-function statement-level execution
-- Cannot trace tensor operations (use [torchview](https://github.com/mert-kurttutan/torchview) for that)
-- Cannot trace C/C++ extension internals
-- Cannot provide web visualization yet (Stage 2)
 
 ## Architecture
 
@@ -130,16 +105,37 @@ See [`docs/stage1/capabilities.md`](docs/stage1/capabilities.md) for details.
 vode/
 ├── src/vode/
 │   ├── cli.py              # CLI interface
-│   └── trace/              # Trace functionality
-│       ├── models.py       # Data models
-│       ├── tracer.py       # Tracing engine (sys.settrace)
-│       ├── value_extractor.py    # Value extraction
-│       ├── dataflow_resolver.py  # Dataflow analysis
-│       ├── serializer.py   # JSON serialization
-│       └── renderer.py     # Text rendering
+│   ├── trace/              # Execution tracing
+│   │   ├── models.py       # Data models
+│   │   ├── tracer.py       # Tracing engine
+│   │   ├── serializer.py   # JSON serialization
+│   │   └── renderer.py     # Text rendering
+│   ├── nn/                 # Neural network visualization
+│   │   ├── capture/        # Capture mechanisms
+│   │   ├── graph/          # Graph building
+│   │   ├── storage/        # Graphviz storage
+│   │   └── render/         # Rendering layer
+│   └── view/               # Web viewer
+│       ├── frontend/       # React frontend
+│       └── server.py       # API server
 ├── tests/                  # Test suite
-└── docs/stage1/           # Documentation
+└── docs/                   # Documentation
 ```
+
+## Documentation
+
+**Execution Tracing**:
+
+- [Capabilities](docs/stage1/capabilities.md) - Feature scope and examples
+- [Quick Start](docs/stage2/quickstart.md) - Getting started guide
+
+**Neural Network Visualization**:
+
+- [Overview](docs/stage3/overview.md) - High-level design
+- [Architecture](docs/stage3/architecture.md) - System architecture
+- [Node Design](docs/stage3/node_design.md) - Node structure and layout
+- [Capture Mechanism](docs/stage3/capture_mechanism.md) - How data is captured
+- [Rendering](docs/stage3/rendering.md) - Web vs static rendering
 
 ## Development
 
@@ -151,30 +147,13 @@ pytest tests/
 pytest tests/test_integration.py -v
 ```
 
-**Test Results**: All 10 integration tests pass (100% success rate).
-
-## Documentation
-
-**Stage 1 (Tracing)**:
-
-- [`docs/stage1/capabilities.md`](docs/stage1/capabilities.md) - Feature scope and examples
-- [`docs/stage1/todo.md`](docs/stage1/todo.md) - Technical implementation plan
-- [`docs/stage1/report.md`](docs/stage1/report.md) - Implementation report (Chinese)
-
-**Stage 2 (Web Viewer)**:
-
-- [`docs/stage2/capabilities.md`](docs/stage2/capabilities.md) - Capability boundaries
-- [`docs/stage2/design.md`](docs/stage2/design.md) - UI/UX design document
-- [`docs/stage2/todo.md`](docs/stage2/todo.md) - Technical implementation plan
-- [`docs/stage2/report.md`](docs/stage2/report.md) - Implementation report (Chinese)
-- [`docs/stage2/quickstart.md`](docs/stage2/quickstart.md) - Quick start guide (Chinese)
-
 ## Roadmap
 
-- [x] Stage 1: Trace functionality
-- [x] Stage 2: Web visualization
-- [ ] Stage 3: Performance profiling
-- [ ] Stage 4: Multi-framework support
+- [x] Function-level execution tracing
+- [x] Web-based visualization
+- [ ] Neural network dual-graph visualization
+- [ ] Performance profiling integration
+- [ ] Multi-framework support (TensorFlow, JAX)
 
 ## License
 

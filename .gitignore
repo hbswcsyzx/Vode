@@ -46,3 +46,6 @@ dist/
 # Keep important JSON files, ignore others
 *.local.json
 .env*.local
+
+# output
+output/

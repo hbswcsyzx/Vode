@@ -232,7 +232,7 @@ graph TB
 
 ## Source Code Structure
 
-```
+```text
 vode/src/vode/
 ├── nn/                          # NEW: Neural network visualization
 │   ├── __init__.py

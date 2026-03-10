@@ -190,6 +190,206 @@ def _generate_structure_graph(
         return output_path
 
 
+def _compare_component_structure(comp1_nodes, comp2_nodes, graph, filtered_edges):
+    """Compare if two components have the same structure.
+
+    Returns:
+        (is_same_structure, is_same_shapes) tuple
+    """
+    from vode.nn.graph.nodes import ModuleNode
+
+    if len(comp1_nodes) != len(comp2_nodes):
+        return False, False
+
+    # Get node types in order for both components
+    def get_ordered_types_and_shapes(nodes, edges):
+        # Find start node (no incoming edges)
+        start = None
+        for n in nodes:
+            if not any(e.dst_id == n for e in edges):
+                start = n
+                break
+        if not start:
+            return [], []
+
+        # Follow the chain
+        types = []
+        shapes = []
+        current = start
+        visited = set()
+        while current and current not in visited:
+            visited.add(current)
+            node = graph.get_node(current)
+            if node and isinstance(node, ModuleNode):
+                types.append(node.module_type)
+                shapes.append((node.input_shapes, node.output_shapes))
+            # Find next
+            next_nodes = [
+                e.dst_id for e in edges if e.src_id == current and e.dst_id in nodes
+            ]
+            current = next_nodes[0] if next_nodes else None
+        return types, shapes
+
+    types1, shapes1 = get_ordered_types_and_shapes(comp1_nodes, filtered_edges)
+    types2, shapes2 = get_ordered_types_and_shapes(comp2_nodes, filtered_edges)
+
+    is_same_structure = types1 == types2
+    is_same_shapes = shapes1 == shapes2
+
+    return is_same_structure, is_same_shapes
+
+
+def _detect_loop_patterns(
+    comp_list, components, comp_to_parent, graph, filtered_edges, debug
+):
+    """Detect consecutive repeated patterns at parent module level.
+
+    Returns:
+        List of (group_indices, is_same_shape) tuples
+    """
+    loop_groups = []
+    i = 0
+
+    while i < len(comp_list):
+        group = [i]
+
+        # Check consecutive components for same structure
+        j = i + 1
+        while j < len(comp_list):
+            is_same_struct, is_same_shape = _compare_component_structure(
+                components[comp_list[i]],
+                components[comp_list[j]],
+                graph,
+                filtered_edges,
+            )
+
+            # Also check parent module type if available
+            parent_i = comp_to_parent.get(comp_list[i])
+            parent_j = comp_to_parent.get(comp_list[j])
+            same_parent_type = False
+            if parent_i and parent_j:
+                # Get module type from graph nodes
+                parent_node_i = graph.get_node(parent_i)
+                parent_node_j = graph.get_node(parent_j)
+                if parent_node_i and parent_node_j:
+                    same_parent_type = (
+                        parent_node_i.module_type == parent_node_j.module_type
+                    )
+
+            if debug:
+                print(
+                    f"[DEBUG] Comparing comp {i} vs {j}: struct={is_same_struct}, shape={is_same_shape}, parent_type={same_parent_type}"
+                )
+
+            if is_same_struct and same_parent_type:
+                group.append(j)
+                j += 1
+            else:
+                break
+
+        if len(group) > 1:
+            # Found a loop pattern
+            _, is_same_shape = _compare_component_structure(
+                components[comp_list[group[0]]],
+                components[comp_list[group[1]]],
+                graph,
+                filtered_edges,
+            )
+            loop_groups.append((group, is_same_shape))
+            if debug:
+                print(
+                    f"[DEBUG] Found loop: indices {group}, same_shape={is_same_shape}"
+                )
+
+        i = j if j > i + 1 else i + 1
+
+    return loop_groups
+
+
+def _apply_loop_visualization(
+    loop_groups, components, comp_list, filtered_nodes, filtered_edges, graph, debug
+):
+    """Apply visualization strategies for detected loops.
+
+    Strategy A (same shapes): Collapse to single component with loop edge
+    Strategy B (different shapes): Keep all components in Z-layout
+    """
+    from vode.nn.graph.builder import Edge
+
+    nodes_to_remove = set()
+    edges_to_add = []
+
+    for group_indices, is_same_shape in loop_groups:
+        if is_same_shape:
+            # Strategy A: Collapse identical loops
+            if debug:
+                print(
+                    f"[DEBUG] Applying Strategy A (collapse) for group {group_indices}"
+                )
+
+            # Keep only first component
+            first_comp_root = comp_list[group_indices[0]]
+            first_comp_nodes = components[first_comp_root]
+
+            # Find first and last nodes in first component
+            first_node = None
+            last_node = None
+            for node_id in first_comp_nodes:
+                if not any(
+                    e.dst_id == node_id
+                    for e in filtered_edges
+                    if e.src_id in first_comp_nodes and e.dst_id in first_comp_nodes
+                ):
+                    first_node = node_id
+                if not any(
+                    e.src_id == node_id
+                    for e in filtered_edges
+                    if e.src_id in first_comp_nodes and e.dst_id in first_comp_nodes
+                ):
+                    last_node = node_id
+
+            # Remove other components in the loop
+            for idx in group_indices[1:]:
+                comp_root = comp_list[idx]
+                for node_id in components[comp_root]:
+                    nodes_to_remove.add(node_id)
+
+            # Add loop edge with "xN" label
+            if first_node and last_node:
+                loop_count = len(group_indices)
+                edges_to_add.append(
+                    Edge(src_id=last_node, dst_id=first_node, label=f"x{loop_count}")
+                )
+                if debug:
+                    print(
+                        f"[DEBUG] Added loop edge: {last_node} -> {first_node} (x{loop_count})"
+                    )
+        else:
+            # Strategy B: Z-layout (keep all components, add rank attributes)
+            if debug:
+                print(
+                    f"[DEBUG] Applying Strategy B (Z-layout) for group {group_indices}"
+                )
+            # For now, just keep all nodes - rank attributes would be added in GraphvizWriter
+
+    # Remove nodes
+    for node_id in nodes_to_remove:
+        if node_id in filtered_nodes:
+            del filtered_nodes[node_id]
+
+    # Remove edges involving removed nodes
+    filtered_edges = [
+        e
+        for e in filtered_edges
+        if e.src_id not in nodes_to_remove and e.dst_id not in nodes_to_remove
+    ]
+
+    # Add new loop edges
+    filtered_edges.extend(edges_to_add)
+
+    return filtered_nodes, filtered_edges
+
+
 def _generate_dataflow_graph(
     model: nn.Module,
     input_data: torch.Tensor | tuple | dict,
@@ -248,8 +448,22 @@ def _generate_dataflow_graph(
 
             # Filter nodes: keep only modules at target depth
             filtered_nodes = {}
+            node_to_parent_map = {}  # Store parent info before clearing
+
             for node in all_nodes:
                 if isinstance(node, ModuleNode) and node.depth == target_depth:
+                    # Store parent info before clearing
+                    if hasattr(node, "parents") and node.parents:
+                        for parent_id in node.parents:
+                            parent_node = graph.get_node(parent_id)
+                            if (
+                                parent_node
+                                and isinstance(parent_node, ModuleNode)
+                                and parent_node.depth == target_depth - 1
+                            ):
+                                node_to_parent_map[node.node_id] = parent_id
+                                break
+
                     # Clear parent-child relationships to avoid edge duplication
                     node.parents = []
                     node.children = []
@@ -264,6 +478,7 @@ def _generate_dataflow_graph(
             # Rebuild cross-parent connections using Union-Find
             if target_depth > 0:
                 from vode.nn.graph.builder import Edge
+                from vode.nn.graph.nodes import ModuleNode
 
                 # Union-Find to find connected components at target depth
                 parent_uf = {}
@@ -295,8 +510,68 @@ def _generate_dataflow_graph(
                 if debug:
                     print(f"[DEBUG] Found {len(components)} connected components")
 
-                # Connect components in sequence
+                # Map components to parent modules
+                # Strategy: Find depth-1 parents in execution order and map to components
+                comp_to_parent = {}
+                parent_to_comp = {}
+
+                # Get all depth-1 modules in execution order
+                depth1_parents = []
+                all_edges = graph.get_edges()
+                visited = set()
+
+                # Find depth-1 modules by traversing edges
+                for edge in all_edges:
+                    for node_id in [edge.src_id, edge.dst_id]:
+                        node = graph.get_node(node_id)
+                        if (
+                            node
+                            and isinstance(node, ModuleNode)
+                            and node.depth == target_depth - 1
+                        ):
+                            if node_id not in visited:
+                                depth1_parents.append(node_id)
+                                visited.add(node_id)
+
+                if debug:
+                    print(f"[DEBUG] Found {len(depth1_parents)} depth-1 parents")
+
+                # Map components to parents (1-to-1 in execution order)
                 comp_list = list(components.keys())
+                for i in range(min(len(comp_list), len(depth1_parents))):
+                    comp_to_parent[comp_list[i]] = depth1_parents[i]
+                    parent_to_comp[depth1_parents[i]] = comp_list[i]
+                    if debug:
+                        parent_node = graph.get_node(depth1_parents[i])
+                        parent_type = (
+                            parent_node.module_type if parent_node else "unknown"
+                        )
+                        print(
+                            f"[DEBUG] Component {i} -> Parent {depth1_parents[i]} ({parent_type})"
+                        )
+
+                # Detect consecutive repeated patterns at parent level
+                comp_list = list(components.keys())
+                loop_groups = _detect_loop_patterns(
+                    comp_list, components, comp_to_parent, graph, filtered_edges, debug
+                )
+
+                # Apply visualization strategies
+                filtered_nodes, filtered_edges = _apply_loop_visualization(
+                    loop_groups,
+                    components,
+                    comp_list,
+                    filtered_nodes,
+                    filtered_edges,
+                    graph,
+                    debug,
+                )
+
+                # Store loop group metadata in graph for rendering
+                graph.loop_groups = loop_groups
+                graph.loop_components = components
+
+                # Connect components in sequence
                 for i in range(len(comp_list) - 1):
                     src_nodes = components[comp_list[i]]
                     dst_nodes = components[comp_list[i + 1]]

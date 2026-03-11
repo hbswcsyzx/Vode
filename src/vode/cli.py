@@ -434,10 +434,31 @@ def visualize_command(args: argparse.Namespace) -> int:
                 )
                 return 1
         else:
-            # Auto-detect: use the last created model
+            # Auto-detect: find top-level models (not submodules of other models)
             if _model_registry:
-                model = _model_registry[-1]
-                print(f"Auto-detected model: {model.__class__.__name__}")
+                # Filter to find models that are not children of other models
+                top_level_models = []
+                for candidate in _model_registry:
+                    is_submodule = False
+                    for other in _model_registry:
+                        if other is not candidate:
+                            # Check if candidate is a submodule of other
+                            for submodule in other.modules():
+                                if submodule is candidate and submodule is not other:
+                                    is_submodule = True
+                                    break
+                        if is_submodule:
+                            break
+                    if not is_submodule:
+                        top_level_models.append(candidate)
+
+                if top_level_models:
+                    model = top_level_models[-1]  # Use the last top-level model
+                    print(f"Auto-detected model: {model.__class__.__name__}")
+                else:
+                    # Fallback to last model if no top-level found
+                    model = _model_registry[-1]
+                    print(f"Auto-detected model: {model.__class__.__name__}")
             else:
                 print("Error: No PyTorch models detected in script", file=sys.stderr)
                 print(
@@ -462,9 +483,8 @@ def visualize_command(args: argparse.Namespace) -> int:
 
         # Visualize the model
         try:
-            # Import the vode wrapper
-            sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-            from vode.visualize import vode
+            # Import the visualize function from vode.nn
+            from vode.nn.visualize import visualize_model
 
             # Handle dynamic mode
             if args.mode == "dynamic":
@@ -473,32 +493,38 @@ def visualize_command(args: argparse.Namespace) -> int:
                     file=sys.stderr,
                 )
                 print(
-                    "Hint: Modify your script to call vode() directly for custom inputs.",
+                    "Hint: Modify your script to call visualize_model() directly for custom inputs.",
                     file=sys.stderr,
                 )
-                # Try to infer input shape from model
-                # For now, skip dynamic mode without inputs
                 print(
                     "Error: Dynamic mode not supported in CLI without explicit inputs",
                     file=sys.stderr,
                 )
                 print(
-                    "Use static mode or call vode() directly in your script",
+                    "Use static mode or call visualize_model() directly in your script",
                     file=sys.stderr,
                 )
                 return 1
 
-            # Static mode
-            result_path = vode(
+            # Static mode - use structure visualization
+            import torch
+
+            dummy_input = torch.randn(1, 10)
+
+            result_paths = visualize_model(
                 model,
-                mode=args.mode,
-                output=output_path,
-                max_depth=args.depth,
+                dummy_input,
+                save_path=(
+                    output_path.rsplit(".", 1)[0] if "." in output_path else output_path
+                ),
                 format=args.format,
-                collapse_loops=args.collapse_loops,
+                graph_type="structure",
+                depth_limit=args.depth,
             )
 
-            print(f"Visualization saved to: {result_path}")
+            print(
+                f"Visualization saved to: {result_paths.get('structure', output_path)}"
+            )
             return 0
 
         except Exception as e:

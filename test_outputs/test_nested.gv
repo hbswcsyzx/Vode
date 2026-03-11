@@ -1,0 +1,132 @@
+digraph ComputationGraph {
+    graph [ordering=in rankdir=LR size="12.0,12.0"]
+    node [align=left fontname="Linux libertine" fontsize=10 height=0.2 margin=0 ranksep=0.1 shape=plaintext style=filled]
+    edge [fontsize=10]
+
+    nroot [label=<
+                    <TABLE BORDER="0" CELLBORDER="1"
+                    CELLSPACING="0" CELLPADDING="4">
+                    <TR>
+                        <TD ROWSPAN="2">NestedModel<BR/>depth:0</TD>
+                        <TD COLSPAN="2">input:</TD>
+                        <TD COLSPAN="2">unknown</TD>
+                    </TR>
+                    <TR>
+                        <TD COLSPAN="2">output:</TD>
+                        <TD COLSPAN="2">unknown</TD>
+                    </TR>
+                    </TABLE>> fillcolor=darkseagreen1>]
+    nencoder [label=<
+                    <TABLE BORDER="0" CELLBORDER="1"
+                    CELLSPACING="0" CELLPADDING="4">
+                    <TR>
+                        <TD ROWSPAN="2">Sequential<BR/>depth:0</TD>
+                        <TD COLSPAN="2">input:</TD>
+                        <TD COLSPAN="2">unknown</TD>
+                    </TR>
+                    <TR>
+                        <TD COLSPAN="2">output:</TD>
+                        <TD COLSPAN="2">unknown</TD>
+                    </TR>
+                    </TABLE>> fillcolor=darkseagreen1>]
+    nencoder.0 [label=<
+                    <TABLE BORDER="0" CELLBORDER="1"
+                    CELLSPACING="0" CELLPADDING="4">
+                    <TR>
+                        <TD ROWSPAN="2">Linear<BR/>depth:1</TD>
+                        <TD COLSPAN="2">input:</TD>
+                        <TD COLSPAN="2">unknown</TD>
+                    </TR>
+                    <TR>
+                        <TD COLSPAN="2">output:</TD>
+                        <TD COLSPAN="2">unknown</TD>
+                    </TR>
+                    </TABLE>> fillcolor=darkseagreen1>]
+    nencoder.1 [label=<
+                    <TABLE BORDER="0" CELLBORDER="1"
+                    CELLSPACING="0" CELLPADDING="4">
+                    <TR>
+                        <TD ROWSPAN="2">ReLU<BR/>depth:1</TD>
+                        <TD COLSPAN="2">input:</TD>
+                        <TD COLSPAN="2">unknown</TD>
+                    </TR>
+                    <TR>
+                        <TD COLSPAN="2">output:</TD>
+                        <TD COLSPAN="2">unknown</TD>
+                    </TR>
+                    </TABLE>> fillcolor=darkseagreen1>]
+    nencoder.2 [label=<
+                    <TABLE BORDER="0" CELLBORDER="1"
+                    CELLSPACING="0" CELLPADDING="4">
+                    <TR>
+                        <TD ROWSPAN="2">Linear<BR/>depth:1</TD>
+                        <TD COLSPAN="2">input:</TD>
+                        <TD COLSPAN="2">unknown</TD>
+                    </TR>
+                    <TR>
+                        <TD COLSPAN="2">output:</TD>
+                        <TD COLSPAN="2">unknown</TD>
+                    </TR>
+                    </TABLE>> fillcolor=darkseagreen1>]
+    ndecoder [label=<
+                    <TABLE BORDER="0" CELLBORDER="1"
+                    CELLSPACING="0" CELLPADDING="4">
+                    <TR>
+                        <TD ROWSPAN="2">Sequential<BR/>depth:0</TD>
+                        <TD COLSPAN="2">input:</TD>
+                        <TD COLSPAN="2">unknown</TD>
+                    </TR>
+                    <TR>
+                        <TD COLSPAN="2">output:</TD>
+                        <TD COLSPAN="2">unknown</TD>
+                    </TR>
+                    </TABLE>> fillcolor=darkseagreen1>]
+    ndecoder.0 [label=<
+                    <TABLE BORDER="0" CELLBORDER="1"
+                    CELLSPACING="0" CELLPADDING="4">
+                    <TR>
+                        <TD ROWSPAN="2">Linear<BR/>depth:1</TD>
+                        <TD COLSPAN="2">input:</TD>
+                        <TD COLSPAN="2">unknown</TD>
+                    </TR>
+                    <TR>
+                        <TD COLSPAN="2">output:</TD>
+                        <TD COLSPAN="2">unknown</TD>
+                    </TR>
+                    </TABLE>> fillcolor=darkseagreen1>]
+    ndecoder.1 [label=<
+                    <TABLE BORDER="0" CELLBORDER="1"
+                    CELLSPACING="0" CELLPADDING="4">
+                    <TR>
+                        <TD ROWSPAN="2">ReLU<BR/>depth:1</TD>
+                        <TD COLSPAN="2">input:</TD>
+                        <TD COLSPAN="2">unknown</TD>
+                    </TR>
+                    <TR>
+                        <TD COLSPAN="2">output:</TD>
+                        <TD COLSPAN="2">unknown</TD>
+                    </TR>
+                    </TABLE>> fillcolor=darkseagreen1>]
+    ndecoder.2 [label=<
+                    <TABLE BORDER="0" CELLBORDER="1"
+                    CELLSPACING="0" CELLPADDING="4">
+                    <TR>
+                        <TD ROWSPAN="2">Linear<BR/>depth:1</TD>
+                        <TD COLSPAN="2">input:</TD>
+                        <TD COLSPAN="2">unknown</TD>
+                    </TR>
+                    <TR>
+                        <TD COLSPAN="2">output:</TD>
+                        <TD COLSPAN="2">unknown</TD>
+                    </TR>
+                    </TABLE>> fillcolor=darkseagreen1>]
+
+    ndecoder -> ndecoder.0
+    ndecoder -> ndecoder.1
+    ndecoder -> ndecoder.2
+    nroot -> nencoder
+    nroot -> ndecoder
+    nencoder -> nencoder.0
+    nencoder -> nencoder.1
+    nencoder -> nencoder.2
+}

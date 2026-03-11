@@ -1,0 +1,46 @@
+strict digraph StructureGraph {
+    graph [ordering=in rankdir=LR]
+    node [style=filled shape=plaintext fontsize=10]
+    edge [fontsize=10]
+
+    root [label=<
+        <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6">
+        <TR>
+            <TD BGCOLOR="#F0F0F0">input<BR/></TD>
+            <TD>SimpleNet<BR/>depth: 0</TD>
+            <TD BGCOLOR="#F0F0F0">output<BR/></TD>
+        </TR>
+        </TABLE>
+    > fillcolor=darkseagreen1 vode_type="module" vode_depth="0" vode_module_type="SimpleNet" vode_params="{\"total_params\": 430, \"trainable_params\": 430}"]
+    fc1 [label=<
+        <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6">
+        <TR>
+            <TD BGCOLOR="#F0F0F0">input<BR/></TD>
+            <TD>Linear<BR/>depth: 1</TD>
+            <TD BGCOLOR="#F0F0F0">output<BR/></TD>
+        </TR>
+        </TABLE>
+    > fillcolor=darkseagreen1 vode_type="module" vode_depth="1" vode_module_type="Linear" vode_params="{\"total_params\": 220, \"trainable_params\": 220, \"in_features\": 10, \"out_features\": 20}"]
+    relu [label=<
+        <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6">
+        <TR>
+            <TD BGCOLOR="#F0F0F0">input<BR/></TD>
+            <TD>ReLU<BR/>depth: 1</TD>
+            <TD BGCOLOR="#F0F0F0">output<BR/></TD>
+        </TR>
+        </TABLE>
+    > fillcolor=darkseagreen1 vode_type="module" vode_depth="1" vode_module_type="ReLU"]
+    fc2 [label=<
+        <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6">
+        <TR>
+            <TD BGCOLOR="#F0F0F0">input<BR/></TD>
+            <TD>Linear<BR/>depth: 1</TD>
+            <TD BGCOLOR="#F0F0F0">output<BR/></TD>
+        </TR>
+        </TABLE>
+    > fillcolor=darkseagreen1 vode_type="module" vode_depth="1" vode_module_type="Linear" vode_params="{\"total_params\": 210, \"trainable_params\": 210, \"in_features\": 20, \"out_features\": 10}"]
+
+    root -> fc1
+    root -> relu
+    root -> fc2
+}

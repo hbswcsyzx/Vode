@@ -1,0 +1,96 @@
+strict digraph StructureGraph {
+    graph [ordering=in rankdir=LR]
+    node [style=filled shape=plaintext fontsize=10]
+    edge [fontsize=10]
+
+    root [label=<
+        <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6">
+        <TR>
+            <TD BGCOLOR="#F0F0F0">input<BR/></TD>
+            <TD>ComplexNet<BR/>depth: 0</TD>
+            <TD BGCOLOR="#F0F0F0">output<BR/></TD>
+        </TR>
+        </TABLE>
+    > fillcolor=darkseagreen1 vode_type="module" vode_depth="0" vode_module_type="ComplexNet" vode_params="{\"total_params\": 1270, \"trainable_params\": 1270}"]
+    layers [label=<
+        <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6">
+        <TR>
+            <TD BGCOLOR="#F0F0F0">input<BR/></TD>
+            <TD>ModuleList<BR/>depth: 1</TD>
+            <TD BGCOLOR="#F0F0F0">output<BR/></TD>
+        </TR>
+        </TABLE>
+    > fillcolor=darkseagreen1 vode_type="module" vode_depth="1" vode_module_type="ModuleList" vode_params="{\"total_params\": 1270, \"trainable_params\": 1270}"]
+    layers_0 [label=<
+        <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6">
+        <TR>
+            <TD BGCOLOR="#F0F0F0">input<BR/></TD>
+            <TD>Linear<BR/>depth: 2</TD>
+            <TD BGCOLOR="#F0F0F0">output<BR/></TD>
+        </TR>
+        </TABLE>
+    > fillcolor=darkseagreen1 vode_type="module" vode_depth="2" vode_module_type="Linear" vode_params="{\"total_params\": 220, \"trainable_params\": 220, \"in_features\": 10, \"out_features\": 20}"]
+    layers_1 [label=<
+        <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6">
+        <TR>
+            <TD BGCOLOR="#F0F0F0">input<BR/></TD>
+            <TD>ReLU<BR/>depth: 2</TD>
+            <TD BGCOLOR="#F0F0F0">output<BR/></TD>
+        </TR>
+        </TABLE>
+    > fillcolor=darkseagreen1 vode_type="module" vode_depth="2" vode_module_type="ReLU"]
+    layers_2 [label=<
+        <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6">
+        <TR>
+            <TD BGCOLOR="#F0F0F0">input<BR/></TD>
+            <TD>Linear<BR/>depth: 2</TD>
+            <TD BGCOLOR="#F0F0F0">output<BR/></TD>
+        </TR>
+        </TABLE>
+    > fillcolor=darkseagreen1 vode_type="module" vode_depth="2" vode_module_type="Linear" vode_params="{\"total_params\": 420, \"trainable_params\": 420, \"in_features\": 20, \"out_features\": 20}"]
+    layers_3 [label=<
+        <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6">
+        <TR>
+            <TD BGCOLOR="#F0F0F0">input<BR/></TD>
+            <TD>ReLU<BR/>depth: 2</TD>
+            <TD BGCOLOR="#F0F0F0">output<BR/></TD>
+        </TR>
+        </TABLE>
+    > fillcolor=darkseagreen1 vode_type="module" vode_depth="2" vode_module_type="ReLU"]
+    layers_4 [label=<
+        <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6">
+        <TR>
+            <TD BGCOLOR="#F0F0F0">input<BR/></TD>
+            <TD>Linear<BR/>depth: 2</TD>
+            <TD BGCOLOR="#F0F0F0">output<BR/></TD>
+        </TR>
+        </TABLE>
+    > fillcolor=darkseagreen1 vode_type="module" vode_depth="2" vode_module_type="Linear" vode_params="{\"total_params\": 420, \"trainable_params\": 420, \"in_features\": 20, \"out_features\": 20}"]
+    layers_5 [label=<
+        <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6">
+        <TR>
+            <TD BGCOLOR="#F0F0F0">input<BR/></TD>
+            <TD>ReLU<BR/>depth: 2</TD>
+            <TD BGCOLOR="#F0F0F0">output<BR/></TD>
+        </TR>
+        </TABLE>
+    > fillcolor=darkseagreen1 vode_type="module" vode_depth="2" vode_module_type="ReLU"]
+    layers_6 [label=<
+        <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6">
+        <TR>
+            <TD BGCOLOR="#F0F0F0">input<BR/></TD>
+            <TD>Linear<BR/>depth: 2</TD>
+            <TD BGCOLOR="#F0F0F0">output<BR/></TD>
+        </TR>
+        </TABLE>
+    > fillcolor=darkseagreen1 vode_type="module" vode_depth="2" vode_module_type="Linear" vode_params="{\"total_params\": 210, \"trainable_params\": 210, \"in_features\": 20, \"out_features\": 10}"]
+
+    root -> layers
+    layers -> layers_0
+    layers -> layers_1
+    layers -> layers_2
+    layers -> layers_3
+    layers -> layers_4
+    layers -> layers_5
+    layers -> layers_6
+}

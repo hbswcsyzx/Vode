@@ -56,7 +56,7 @@ class GraphvizRenderer:
         # Start DOT graph
         lines = [
             "digraph ComputationGraph {",
-            f'    graph [ordering=in rankdir={rankdir} size="12.0,12.0"]',
+            f"    graph [ordering=in rankdir={rankdir}]",
             '    node [align=left fontname="Linux libertine" fontsize=10 height=0.2 margin=0 ranksep=0.1 shape=plaintext style=filled]',
             "    edge [fontsize=10]",
             "",

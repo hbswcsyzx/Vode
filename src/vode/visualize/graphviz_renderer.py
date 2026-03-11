@@ -155,26 +155,26 @@ class GraphvizRenderer:
         node_label = self._get_node_label(node.node_id)
 
         if isinstance(node, TensorNode):
-            html = self._render_tensor_node(node)
+            html, attrs = self._render_tensor_node(node)
         elif isinstance(node, ModuleNode):
-            html = self._render_module_node(node)
+            html, attrs = self._render_module_node(node)
         elif isinstance(node, FunctionNode):
-            html = self._render_function_node(node)
+            html, attrs = self._render_function_node(node)
         elif isinstance(node, LoopNode):
-            html = self._render_loop_node(node, collapse_loops)
+            html, attrs = self._render_loop_node(node, collapse_loops)
         else:
-            html = self._render_generic_node(node)
+            html, attrs = self._render_generic_node(node)
 
-        lines.append(f"    {node_label} [label=<{html}>]")
+        lines.append(f"    {node_label} [label=<{html}> {attrs}]")
 
-    def _render_tensor_node(self, node: TensorNode) -> str:
+    def _render_tensor_node(self, node: TensorNode) -> tuple[str, str]:
         """Render TensorNode as HTML table.
 
         Args:
             node: TensorNode to render
 
         Returns:
-            HTML table string
+            Tuple of (HTML table string, attributes string)
         """
         shape_str = self._format_shape(node.shape) if node.shape else "unknown"
         dtype_str = node.dtype.replace("torch.", "") if node.dtype else ""
@@ -197,21 +197,22 @@ class GraphvizRenderer:
 
         color = self.COLORS["TensorNode"]
 
-        return f"""
+        html = f"""
                     <TABLE BORDER="0" CELLBORDER="1"
                     CELLSPACING="0" CELLPADDING="4">
                         <TR><TD>{node.name}<BR/>depth:{node.depth}</TD><TD>{info_str}</TD></TR>
                         {stats_row}
-                    </TABLE>> fillcolor={color}"""
+                    </TABLE>"""
+        return html, f"fillcolor={color}"
 
-    def _render_module_node(self, node: ModuleNode) -> str:
+    def _render_module_node(self, node: ModuleNode) -> tuple[str, str]:
         """Render ModuleNode as HTML table.
 
         Args:
             node: ModuleNode to render
 
         Returns:
-            HTML table string
+            Tuple of (HTML table string, attributes string)
         """
         module_type = node.module_type or "Module"
 
@@ -238,7 +239,7 @@ class GraphvizRenderer:
 
         color = self.COLORS["ModuleNode"]
 
-        return f"""
+        html = f"""
                     <TABLE BORDER="0" CELLBORDER="1"
                     CELLSPACING="0" CELLPADDING="4">
                     <TR>
@@ -250,16 +251,17 @@ class GraphvizRenderer:
                         <TD COLSPAN="2">output:</TD>
                         <TD COLSPAN="2">{output_str}</TD>
                     </TR>
-                    </TABLE>> fillcolor={color}"""
+                    </TABLE>"""
+        return html, f"fillcolor={color}"
 
-    def _render_function_node(self, node: FunctionNode) -> str:
+    def _render_function_node(self, node: FunctionNode) -> tuple[str, str]:
         """Render FunctionNode as HTML table.
 
         Args:
             node: FunctionNode to render
 
         Returns:
-            HTML table string
+            Tuple of (HTML table string, attributes string)
         """
         func_name = node.func_name or "function"
 
@@ -282,7 +284,7 @@ class GraphvizRenderer:
 
         color = self.COLORS["FunctionNode"]
 
-        return f"""
+        html = f"""
                     <TABLE BORDER="0" CELLBORDER="1"
                     CELLSPACING="0" CELLPADDING="4">
                     <TR>
@@ -294,9 +296,10 @@ class GraphvizRenderer:
                         <TD COLSPAN="2">output:</TD>
                         <TD COLSPAN="2">{output_str}</TD>
                     </TR>
-                    </TABLE>> fillcolor={color}"""
+                    </TABLE>"""
+        return html, f"fillcolor={color}"
 
-    def _render_loop_node(self, node: LoopNode, collapse: bool) -> str:
+    def _render_loop_node(self, node: LoopNode, collapse: bool) -> tuple[str, str]:
         """Render LoopNode as HTML table.
 
         Args:
@@ -304,7 +307,7 @@ class GraphvizRenderer:
             collapse: Whether to show collapsed view
 
         Returns:
-            HTML table string
+            Tuple of (HTML table string, attributes string)
         """
         loop_type = node.loop_type
         iter_count = node.iteration_count or "?"
@@ -316,28 +319,30 @@ class GraphvizRenderer:
 
         color = self.COLORS["LoopNode"]
 
-        return f"""
+        html = f"""
                     <TABLE BORDER="0" CELLBORDER="1"
                     CELLSPACING="0" CELLPADDING="4">
                         <TR><TD>{loop_type} loop<BR/>depth:{node.depth}</TD><TD>{iter_count} iterations<BR/>{body_info}</TD></TR>
-                    </TABLE>> fillcolor={color}"""
+                    </TABLE>"""
+        return html, f"fillcolor={color}"
 
-    def _render_generic_node(self, node: Node) -> str:
+    def _render_generic_node(self, node: Node) -> tuple[str, str]:
         """Render generic Node as HTML table.
 
         Args:
             node: Node to render
 
         Returns:
-            HTML table string
+            Tuple of (HTML table string, attributes string)
         """
         node_type = node.__class__.__name__
 
-        return f"""
+        html = f"""
                     <TABLE BORDER="0" CELLBORDER="1"
                     CELLSPACING="0" CELLPADDING="4">
                         <TR><TD>{node_type}<BR/>{node.name}<BR/>depth:{node.depth}</TD></TR>
-                    </TABLE>> fillcolor=white"""
+                    </TABLE>"""
+        return html, "fillcolor=white"
 
     def _render_collapsed_node(self, node_id: str, lines: list[str]) -> None:
         """Render a collapsed node (beyond max_depth).
@@ -360,7 +365,10 @@ class GraphvizRenderer:
                     <TABLE BORDER="0" CELLBORDER="1"
                     CELLSPACING="0" CELLPADDING="4">
                         <TR><TD>... {count} more nodes</TD></TR>
-                    </TABLE>> fillcolor={color}"""
+                    </TABLE>"""
+
+        lines.append(f"    {node_label} [label=<{html}> fillcolor={color}]")
+        self.rendered_nodes.add(node_id)
 
         lines.append(f"    {node_label} [label=<{html}>]")
         self.rendered_nodes.add(node_id)

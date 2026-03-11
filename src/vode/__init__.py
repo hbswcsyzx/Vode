@@ -1,23 +1,41 @@
-"""Vode - Function-level execution tracer for Python/PyTorch.
+"""VODE - Visualization of Deep Execution.
 
-This package provides tools for tracing and visualizing Python execution.
+A Python code execution visualization tool with specialized support for PyTorch models.
+Uses a recursive descent modeling approach: input -> operation -> output.
 """
 
 __version__ = "0.1.0"
 
-# Re-export main components for convenience
-from vode.trace import (
-    TraceRuntime,
-    TraceConfig,
-    TraceGraph,
-    GraphSerializer,
-    TextRenderer,
+from .core import (
+    Node,
+    TensorNode,
+    ModuleNode,
+    FunctionNode,
+    LoopNode,
+    ComputationGraph,
+)
+from .capture import capture_static, capture_dynamic
+from .visualize import (
+    GraphvizRenderer,
+    visualize,
+    visualize_static,
+    visualize_dynamic,
+    vode,
 )
 
 __all__ = [
-    "TraceRuntime",
-    "TraceConfig",
-    "TraceGraph",
-    "GraphSerializer",
-    "TextRenderer",
+    "__version__",
+    "Node",
+    "TensorNode",
+    "ModuleNode",
+    "FunctionNode",
+    "LoopNode",
+    "ComputationGraph",
+    "capture_static",
+    "capture_dynamic",
+    "GraphvizRenderer",
+    "visualize",
+    "visualize_static",
+    "visualize_dynamic",
+    "vode",
 ]

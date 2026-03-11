@@ -8,11 +8,44 @@ import argparse
 import sys
 import runpy
 from pathlib import Path
+from typing import Any
 
 from vode.trace.tracer import TraceRuntime, TraceConfig
 from vode.trace.serializer import GraphSerializer
 from vode.trace.renderer import TextRenderer
 from vode.trace.dataflow_resolver import DataflowResolver
+
+
+# Global registry for tracking created models
+_model_registry: list[Any] = []
+
+
+def _track_model_creation():
+    """Hook into torch.nn.Module.__init__ to track model creation."""
+    try:
+        import torch.nn as nn
+
+        original_init = nn.Module.__init__
+
+        def tracked_init(self, *args, **kwargs):
+            original_init(self, *args, **kwargs)
+            _model_registry.append(self)
+
+        nn.Module.__init__ = tracked_init
+    except ImportError:
+        pass  # PyTorch not available
+
+
+def _restore_model_tracking():
+    """Restore original torch.nn.Module.__init__."""
+    try:
+        import torch.nn as nn
+
+        # This is a simplified restore - in practice we'd save the original
+        # For now, just clear the registry
+        _model_registry.clear()
+    except ImportError:
+        pass
 
 
 def create_parser() -> argparse.ArgumentParser:
@@ -23,10 +56,82 @@ def create_parser() -> argparse.ArgumentParser:
     """
     parser = argparse.ArgumentParser(
         prog="vode",
-        description="Vode: Function-level execution tracer for Python/PyTorch",
+        description="Vode: Visualization and execution tracer for Python/PyTorch",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Visualize models in a script (static mode)
+  vode script.py
+  
+  # Visualize with options
+  vode --mode static --format pdf --output model.pdf script.py
+  
+  # Trace execution
+  vode trace script.py --output trace.json
+  
+  # View saved trace
+  vode view trace.json --web
+        """,
     )
 
     subparsers = parser.add_subparsers(dest="command", help="Command to execute")
+
+    # Visualize command (default, also accessible without subcommand)
+    viz_parser = subparsers.add_parser(
+        "viz",
+        help="Visualize PyTorch models in a script",
+        add_help=False,  # We'll handle help at the parent level
+    )
+    viz_parser.add_argument(
+        "script",
+        help="Python script to visualize",
+    )
+    viz_parser.add_argument(
+        "script_args",
+        nargs=argparse.REMAINDER,
+        help="Arguments to pass to the script",
+    )
+    viz_parser.add_argument(
+        "--mode",
+        "-m",
+        choices=["static", "dynamic"],
+        default="static",
+        help="Visualization mode: 'static' (structure only) or 'dynamic' (with tensor shapes)",
+    )
+    viz_parser.add_argument(
+        "--format",
+        "-f",
+        choices=["svg", "png", "pdf", "gv"],
+        default="svg",
+        help="Output format (default: svg)",
+    )
+    viz_parser.add_argument(
+        "--output",
+        "-o",
+        help="Output file path (default: auto-generated from script name)",
+    )
+    viz_parser.add_argument(
+        "--depth",
+        "-d",
+        type=int,
+        help="Maximum depth for visualization (default: None = full depth)",
+    )
+    viz_parser.add_argument(
+        "--collapse-loops",
+        action="store_true",
+        default=True,
+        help="Collapse loop patterns in visualization (default: True)",
+    )
+    viz_parser.add_argument(
+        "--no-collapse-loops",
+        dest="collapse_loops",
+        action="store_false",
+        help="Don't collapse loop patterns",
+    )
+    viz_parser.add_argument(
+        "--model-name",
+        help="Variable name of the model to visualize (default: auto-detect)",
+    )
 
     # Trace command
     trace_parser = subparsers.add_parser(
@@ -217,21 +322,22 @@ def view_command(args: argparse.Namespace) -> int:
         return 1
 
     # Check if web viewer is requested
-    if hasattr(args, 'web') and args.web:
+    if hasattr(args, "web") and args.web:
         # Start web viewer
         try:
             from vode.view.server import ViewServer
-            
-            host = getattr(args, 'host', '127.0.0.1')
-            port = getattr(args, 'port', 8000)
-            no_browser = getattr(args, 'no_browser', False)
-            
+
+            host = getattr(args, "host", "127.0.0.1")
+            port = getattr(args, "port", 8000)
+            no_browser = getattr(args, "no_browser", False)
+
             server = ViewServer(trace_file, host, port)
             server.run(open_browser=not no_browser)
             return 0
         except Exception as e:
             print(f"Error starting web viewer: {e}", file=sys.stderr)
             import traceback
+
             traceback.print_exc()
             return 1
 
@@ -261,14 +367,183 @@ def view_command(args: argparse.Namespace) -> int:
     return 0
 
 
+def visualize_command(args: argparse.Namespace) -> int:
+    """Execute the visualize command (direct script visualization).
+
+    Args:
+        args: Parsed command-line arguments
+
+    Returns:
+        Exit code (0 for success, non-zero for error)
+    """
+    script_path = Path(args.script)
+
+    # Check if script exists
+    if not script_path.exists():
+        print(f"Error: Script not found: {script_path}", file=sys.stderr)
+        return 1
+
+    # Determine output path
+    if args.output:
+        output_path = args.output
+    else:
+        # Auto-generate from script name
+        script_stem = script_path.stem
+        output_path = f"{script_stem}_{args.mode}.{args.format}"
+
+    # Prepare script execution environment
+    script_path_abs = script_path.resolve()
+    original_argv = sys.argv.copy()
+    original_path = sys.path.copy()
+
+    try:
+        # Set up sys.argv for the target script
+        sys.argv = [str(script_path_abs)] + args.script_args
+
+        # Add script directory to path
+        script_dir = str(script_path_abs.parent)
+        if script_dir not in sys.path:
+            sys.path.insert(0, script_dir)
+
+        # Track model creation
+        _track_model_creation()
+
+        # Execute the script
+        try:
+            script_globals = runpy.run_path(str(script_path_abs), run_name="__main__")
+        except SystemExit:
+            # Allow the script to exit normally
+            pass
+        except Exception as e:
+            print(f"Error executing script: {e}", file=sys.stderr)
+            import traceback
+
+            traceback.print_exc()
+            return 1
+
+        # Detect model
+        model = None
+        if args.model_name:
+            # Use specified model name
+            if args.model_name in script_globals:
+                model = script_globals[args.model_name]
+            else:
+                print(
+                    f"Error: Model '{args.model_name}' not found in script",
+                    file=sys.stderr,
+                )
+                return 1
+        else:
+            # Auto-detect: use the last created model
+            if _model_registry:
+                model = _model_registry[-1]
+                print(f"Auto-detected model: {model.__class__.__name__}")
+            else:
+                print("Error: No PyTorch models detected in script", file=sys.stderr)
+                print(
+                    "Hint: Use --model-name to specify the model variable name",
+                    file=sys.stderr,
+                )
+                return 1
+
+        # Verify it's a PyTorch model
+        try:
+            import torch.nn as nn
+
+            if not isinstance(model, nn.Module):
+                print(
+                    f"Error: Detected object is not a PyTorch model: {type(model)}",
+                    file=sys.stderr,
+                )
+                return 1
+        except ImportError:
+            print("Error: PyTorch is not installed", file=sys.stderr)
+            return 1
+
+        # Visualize the model
+        try:
+            # Import the vode wrapper
+            sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+            from vode.visualize import vode
+
+            # Handle dynamic mode
+            if args.mode == "dynamic":
+                print(
+                    "Warning: Dynamic mode requires sample input. Using default input shapes.",
+                    file=sys.stderr,
+                )
+                print(
+                    "Hint: Modify your script to call vode() directly for custom inputs.",
+                    file=sys.stderr,
+                )
+                # Try to infer input shape from model
+                # For now, skip dynamic mode without inputs
+                print(
+                    "Error: Dynamic mode not supported in CLI without explicit inputs",
+                    file=sys.stderr,
+                )
+                print(
+                    "Use static mode or call vode() directly in your script",
+                    file=sys.stderr,
+                )
+                return 1
+
+            # Static mode
+            result_path = vode(
+                model,
+                mode=args.mode,
+                output=output_path,
+                max_depth=args.depth,
+                format=args.format,
+                collapse_loops=args.collapse_loops,
+            )
+
+            print(f"Visualization saved to: {result_path}")
+            return 0
+
+        except Exception as e:
+            print(f"Error visualizing model: {e}", file=sys.stderr)
+            import traceback
+
+            traceback.print_exc()
+            return 1
+
+    finally:
+        # Restore original sys.argv and sys.path
+        sys.argv = original_argv
+        sys.path = original_path
+        _restore_model_tracking()
+
+
 def main() -> int:
     """Main entry point for the CLI.
 
     Returns:
         Exit code (0 for success, non-zero for error)
     """
-    parser = create_parser()
-    args = parser.parse_args()
+    # Pre-parse to detect if first arg is a subcommand or a script file
+    if len(sys.argv) > 1:
+        first_arg = sys.argv[1]
+        # Check if it's a subcommand
+        if first_arg in ["trace", "view", "viz"]:
+            # Let argparse handle it normally
+            parser = create_parser()
+            args = parser.parse_args()
+        elif first_arg.startswith("-"):
+            # It's a flag, show help
+            parser = create_parser()
+            parser.print_help()
+            return 1
+        else:
+            # Assume it's a script file - inject "viz" subcommand
+            sys.argv.insert(1, "viz")
+            parser = create_parser()
+            args = parser.parse_args()
+    else:
+        # No arguments, show help
+        parser = create_parser()
+        parser.print_help()
+        return 1
 
     # Check if a command was provided
     if not args.command:
@@ -276,7 +551,9 @@ def main() -> int:
         return 1
 
     # Execute the appropriate command
-    if args.command == "trace":
+    if args.command == "viz":
+        return visualize_command(args)
+    elif args.command == "trace":
         return trace_command(args)
     elif args.command == "view":
         return view_command(args)

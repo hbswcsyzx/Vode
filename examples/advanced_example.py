@@ -7,17 +7,29 @@ This example demonstrates VODE with a more complex architecture featuring:
 - Multiple module types
 
 Usage:
+    # Run directly with Python:
     python advanced_example.py
 
     # Or visualize with VODE CLI:
     vode --stage4 --depth 2 advanced_example.py
 """
 
+import os
+import sys
 import torch
 import torch.nn as nn
-from vode.capture.static_capture import capture_static_execution_graph
-from vode.capture.dynamic_capture import capture_dynamic_execution_graph
-from vode.visualize.graphviz_renderer import render_execution_graph, expand_to_depth
+from pathlib import Path
+
+# Get script directory and output directory
+SCRIPT_DIR = Path(__file__).parent
+OUTPUT_DIR = SCRIPT_DIR / "output" / "advanced"
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+# Only import VODE if not being analyzed by VODE CLI
+if __name__ == "__main__":
+    from vode.capture.static_capture import capture_static_execution_graph
+    from vode.capture.dynamic_capture import capture_dynamic_execution_graph
+    from vode.visualize.graphviz_renderer import render_execution_graph, expand_to_depth
 
 
 class ResidualBlock(nn.Module):
@@ -245,30 +257,34 @@ def main():
     # Depth 0: Show only root
     print("   - Depth 0 (root only)...")
     dot_depth0 = render_execution_graph(static_root, max_depth=0)
-    with open("advanced_depth0.gv", "w") as f:
+    output_file = OUTPUT_DIR / "advanced_depth0.gv"
+    with open(output_file, "w") as f:
         f.write(dot_depth0.source)
-    print("     Saved to: advanced_depth0.gv")
+    print(f"     Saved to: {output_file}")
 
     # Depth 1: Show main stages
     print("   - Depth 1 (main stages)...")
     dot_depth1 = render_execution_graph(static_root, max_depth=1)
-    with open("advanced_depth1.gv", "w") as f:
+    output_file = OUTPUT_DIR / "advanced_depth1.gv"
+    with open(output_file, "w") as f:
         f.write(dot_depth1.source)
-    print("     Saved to: advanced_depth1.gv")
+    print(f"     Saved to: {output_file}")
 
     # Depth 2: Show stage internals
     print("   - Depth 2 (stage internals)...")
     dot_depth2 = render_execution_graph(static_root, max_depth=2)
-    with open("advanced_depth2.gv", "w") as f:
+    output_file = OUTPUT_DIR / "advanced_depth2.gv"
+    with open(output_file, "w") as f:
         f.write(dot_depth2.source)
-    print("     Saved to: advanced_depth2.gv")
+    print(f"     Saved to: {output_file}")
 
     # Dynamic visualization
     print("   - Dynamic (with shapes)...")
     dot_dynamic = render_execution_graph(dynamic_root, max_depth=1)
-    with open("advanced_dynamic.gv", "w") as f:
+    output_file = OUTPUT_DIR / "advanced_dynamic.gv"
+    with open(output_file, "w") as f:
         f.write(dot_dynamic.source)
-    print("     Saved to: advanced_dynamic.gv")
+    print(f"     Saved to: {output_file}")
 
     print("\n" + "=" * 60)
     print("Example completed successfully!")
@@ -280,6 +296,7 @@ def main():
     print("  ✓ Multi-stage architecture")
     print("  ✓ Depth-based expansion control")
     print("\nTo visualize the .gv files:")
+    print(f"  cd {OUTPUT_DIR}")
     print("  dot -Tpng advanced_depth1.gv -o advanced_depth1.png")
     print("  dot -Tsvg advanced_depth2.gv -o advanced_depth2.svg")
 

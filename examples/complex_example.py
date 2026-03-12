@@ -463,7 +463,7 @@ def main():
     print(f"   Source shape: {tuple(src.shape)}")
     print(f"   Target shape: {tuple(tgt.shape)}")
 
-    dynamic_root = capture_dynamic_execution_graph(model, src, tgt)
+    dynamic_root = capture_dynamic_execution_graph(model, (src, tgt))
     print(f"   Captured {len(dynamic_root.children)} top-level modules")
 
     # Render at different depths
@@ -473,17 +473,18 @@ def main():
     for depth in depths_to_render:
         print(f"   - Depth {depth}...")
         dot = render_execution_graph(static_root, max_depth=depth)
-        filename = f"complex_depth{depth}.gv"
-        with open(filename, "w") as f:
+        output_file = OUTPUT_DIR / f"complex_depth{depth}.gv"
+        with open(output_file, "w") as f:
             f.write(dot.source)
-        print(f"     Saved to: {filename}")
+        print(f"     Saved to: {output_file}")
 
     # Dynamic visualization
     print("   - Dynamic (with shapes)...")
     dot_dynamic = render_execution_graph(dynamic_root, max_depth=1)
-    with open("complex_dynamic.gv", "w") as f:
+    output_file = OUTPUT_DIR / "complex_dynamic.gv"
+    with open(output_file, "w") as f:
         f.write(dot_dynamic.source)
-    print("     Saved to: complex_dynamic.gv")
+    print(f"     Saved to: {output_file}")
 
     print("\n" + "=" * 80)
     print("Example completed successfully!")
@@ -501,6 +502,7 @@ def main():
     print("  - Use depth 2-3 to see encoder/decoder layer details")
     print("  - Use depth 4+ to see attention mechanism internals")
     print("\nTo visualize the .gv files:")
+    print(f"  cd {OUTPUT_DIR}")
     print("  dot -Tpng complex_depth1.gv -o complex_depth1.png")
     print("  dot -Tsvg complex_depth2.gv -o complex_depth2.svg")
 

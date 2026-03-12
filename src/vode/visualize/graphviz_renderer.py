@@ -557,6 +557,13 @@ class GraphvizRenderer:
         if operation.params_count > 0:
             parts.append(f"{self._format_number(operation.params_count)} params")
 
+        # Display loop information
+        if operation.is_loop:
+            loop_info = f"{operation.loop_type} loop"
+            if operation.iteration_count:
+                loop_info += f" ({operation.iteration_count}x)"
+            parts.append(f"<I>{loop_info}</I>")
+
         if operation.is_composite:
             parts.append("(composite)")
 

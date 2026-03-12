@@ -309,11 +309,28 @@ def _module_to_operation_info(module: nn.Module, name: str = "") -> OperationInf
     children = list(module.children())
     is_composite = len(children) > 0 and not type(module) in LEAF_MODULES
 
+    # Detect loop structures
+    is_loop = False
+    loop_type = None
+    iteration_count = None
+
+    if isinstance(module, nn.Sequential):
+        is_loop = True
+        loop_type = "sequential"
+        iteration_count = len(children)
+    elif isinstance(module, nn.ModuleList):
+        is_loop = True
+        loop_type = "modulelist"
+        iteration_count = len(children)
+
     return OperationInfo(
         op_type=module_type,
         op_name=op_name,
         params_count=params_count,
         is_composite=is_composite,
+        is_loop=is_loop,
+        loop_type=loop_type,
+        iteration_count=iteration_count,
     )
 
 

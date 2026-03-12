@@ -467,11 +467,28 @@ def _module_to_operation_info(module: nn.Module, name: str = "") -> OperationInf
     children = list(module.children())
     is_composite = len(children) > 0
 
+    # Detect loop structures
+    is_loop = False
+    loop_type = None
+    iteration_count = None
+
+    if isinstance(module, nn.Sequential):
+        is_loop = True
+        loop_type = "sequential"
+        iteration_count = len(children)
+    elif isinstance(module, nn.ModuleList):
+        is_loop = True
+        loop_type = "modulelist"
+        iteration_count = len(children)
+
     return OperationInfo(
         op_type=module_type,
         op_name=op_name,
         params_count=params_count,
         is_composite=is_composite,
+        is_loop=is_loop,
+        loop_type=loop_type,
+        iteration_count=iteration_count,
     )
 
 
@@ -505,6 +522,7 @@ class DynamicExecutionCapture:
         self._hooks: list[Any] = []
         self._module_to_node: dict[int, ExecutionNode] = {}  # id(module) -> node
         self._module_to_name: dict[int, str] = {}  # id(module) -> name
+        self._module_call_count: dict[int, int] = {}  # id(module) -> call count
         self._node_counter = 0
 
     def _get_module_name(self, module: nn.Module) -> str:
@@ -589,6 +607,11 @@ class DynamicExecutionCapture:
         if module_id not in self._module_to_node:
             return
 
+        # Track module call count for reuse detection
+        self._module_call_count[module_id] = (
+            self._module_call_count.get(module_id, 0) + 1
+        )
+
         node = self._module_to_node[module_id]
 
         # Flatten inputs to get all tensors
@@ -671,10 +694,25 @@ class DynamicExecutionCapture:
             # Always remove hooks
             self._remove_hooks()
 
+        # Detect module reuse and mark as loops
+        self._detect_module_reuse()
+
         if self.root_node is None:
             raise RuntimeError("Failed to capture root node")
 
         return self.root_node
+
+    def _detect_module_reuse(self) -> None:
+        """Detect modules that were called multiple times and mark as reuse loops."""
+        for module_id, call_count in self._module_call_count.items():
+            if call_count > 1:
+                node = self._module_to_node.get(module_id)
+                if node:
+                    # Only mark as reuse if not already marked as sequential/modulelist
+                    if not node.operation.is_loop:
+                        node.operation.is_loop = True
+                        node.operation.loop_type = "reuse"
+                        node.operation.iteration_count = call_count
 
 
 def capture_dynamic_execution_graph(model: nn.Module, input_data: Any) -> ExecutionNode:

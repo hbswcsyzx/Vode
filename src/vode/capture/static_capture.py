@@ -11,6 +11,9 @@ from vode.core import (
     ComputationGraph,
     ModuleNode,
     LoopNode,
+    ExecutionNode,
+    TensorInfo,
+    OperationInfo,
     generate_node_id,
     sanitize_name,
 )
@@ -269,3 +272,130 @@ def capture_static(model: nn.Module) -> ComputationGraph:
     """
     capturer = StaticCapture(model)
     return capturer.capture()
+
+
+# ============================================================================
+# New ExecutionNode-based capture (Stage 4)
+# ============================================================================
+
+
+def _count_parameters(module: nn.Module) -> int:
+    """Count trainable parameters in a module.
+
+    Args:
+        module: PyTorch module
+
+    Returns:
+        Number of trainable parameters
+    """
+    return sum(p.numel() for p in module.parameters() if p.requires_grad)
+
+
+def _module_to_operation_info(module: nn.Module, name: str = "") -> OperationInfo:
+    """Convert PyTorch module to OperationInfo.
+
+    Args:
+        module: PyTorch module
+        name: Module name (optional)
+
+    Returns:
+        OperationInfo with module metadata
+    """
+    module_type = module.__class__.__name__
+    op_name = name if name else module_type
+    params_count = _count_parameters(module)
+
+    # Check if module is composite (has children)
+    children = list(module.children())
+    is_composite = len(children) > 0 and not type(module) in LEAF_MODULES
+
+    return OperationInfo(
+        op_type=module_type,
+        op_name=op_name,
+        params_count=params_count,
+        is_composite=is_composite,
+    )
+
+
+def _build_execution_node_recursive(
+    module: nn.Module, name: str, depth: int, node_id_prefix: str
+) -> ExecutionNode:
+    """Recursively build ExecutionNode hierarchy from PyTorch module.
+
+    Args:
+        module: PyTorch module to convert
+        name: Module name
+        depth: Current depth in hierarchy
+        node_id_prefix: Prefix for generating node IDs
+
+    Returns:
+        ExecutionNode with children populated
+    """
+    # Generate node ID
+    node_id = f"{node_id_prefix}_{sanitize_name(name)}" if name else node_id_prefix
+
+    # Create operation info
+    operation = _module_to_operation_info(module, name)
+
+    # Create ExecutionNode (static capture has no runtime tensor info)
+    node = ExecutionNode(
+        node_id=node_id,
+        name=name if name else module.__class__.__name__,
+        depth=depth,
+        inputs=[],  # Static capture doesn't have runtime data
+        operation=operation,
+        outputs=[],  # Static capture doesn't have runtime data
+        children=[],
+        is_expandable=operation.is_composite,
+        is_expanded=False,
+    )
+
+    # Recursively process children if composite
+    if operation.is_composite:
+        for child_name, child_module in module.named_children():
+            child_node = _build_execution_node_recursive(
+                child_module, child_name, depth + 1, node_id
+            )
+            node.add_child(child_node)
+
+    return node
+
+
+def capture_static_execution_graph(model: nn.Module) -> ExecutionNode:
+    """Capture PyTorch model structure as ExecutionNode hierarchy.
+
+    This is the new Stage 4 API that builds ExecutionNode hierarchies
+    compatible with the new renderer. Unlike the old capture_static(),
+    this returns a single root ExecutionNode with recursive children.
+
+    Args:
+        model: PyTorch model to capture
+
+    Returns:
+        Root ExecutionNode with complete hierarchy
+
+    Raises:
+        TypeError: If model is not an nn.Module
+
+    Example:
+        >>> import torch.nn as nn
+        >>> from vode.capture import capture_static_execution_graph
+        >>>
+        >>> model = nn.Sequential(
+        ...     nn.Linear(10, 20),
+        ...     nn.ReLU(),
+        ...     nn.Linear(20, 10)
+        ... )
+        >>> root = capture_static_execution_graph(model)
+        >>> print(f"Root has {len(root.children)} children")
+        >>> print(f"Is expandable: {root.is_expandable}")
+    """
+    if not isinstance(model, nn.Module):
+        raise TypeError(f"Expected nn.Module, got {type(model).__name__}")
+
+    # Build ExecutionNode hierarchy
+    root = _build_execution_node_recursive(
+        module=model, name="", depth=0, node_id_prefix="root"
+    )
+
+    return root

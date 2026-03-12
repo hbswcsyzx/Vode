@@ -7,6 +7,7 @@ descent modeling approach where everything is represented as:
 
 __version__ = "0.1.0"
 
+# Node classes
 from .nodes import (
     Node,
     TensorNode,
@@ -17,7 +18,45 @@ from .nodes import (
     TensorInfo,
     OperationInfo,
 )
+
+# Graph container
 from .graph import ComputationGraph
+
+# Serialization
+from .serializer import (
+    serialize_graph,
+    deserialize_graph,
+    save_graph,
+    load_graph,
+    serialize_execution_node,
+    deserialize_execution_node,
+    save_execution_node,
+    load_execution_node,
+)
+
+# Validation
+from .validator import (
+    ValidationError,
+    validate_graph,
+    validate_execution_node,
+    validate_json_data,
+)
+
+# Type definitions
+from .types import (
+    NodeType,
+    EdgeType,
+    LoopType,
+    CaptureMode,
+    OutputFormat,
+    GraphDirection,
+    NodeTypeEnum,
+    EdgeTypeEnum,
+    LoopTypeEnum,
+    CaptureModeEnum,
+)
+
+# Utilities
 from .utils import (
     generate_node_id,
     format_shape,
@@ -40,12 +79,36 @@ __all__ = [
     "ModuleNode",
     "FunctionNode",
     "LoopNode",
-    # Stage 4 classes
     "ExecutionNode",
     "TensorInfo",
     "OperationInfo",
     # Graph
     "ComputationGraph",
+    # Serialization
+    "serialize_graph",
+    "deserialize_graph",
+    "save_graph",
+    "load_graph",
+    "serialize_execution_node",
+    "deserialize_execution_node",
+    "save_execution_node",
+    "load_execution_node",
+    # Validation
+    "ValidationError",
+    "validate_graph",
+    "validate_execution_node",
+    "validate_json_data",
+    # Types
+    "NodeType",
+    "EdgeType",
+    "LoopType",
+    "CaptureMode",
+    "OutputFormat",
+    "GraphDirection",
+    "NodeTypeEnum",
+    "EdgeTypeEnum",
+    "LoopTypeEnum",
+    "CaptureModeEnum",
     # Utilities
     "generate_node_id",
     "format_shape",
@@ -58,3 +121,4 @@ __all__ = [
     "get_module_info",
     "truncate_string",
 ]
+

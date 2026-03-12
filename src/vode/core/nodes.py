@@ -304,12 +304,18 @@ class OperationInfo:
         op_name: Human-readable operation name
         params_count: Number of learnable parameters (0 for parameterless ops)
         is_composite: Whether this operation can be expanded into sub-operations
+        is_loop: Whether this operation represents a loop structure
+        loop_type: Type of loop if is_loop is True ('sequential', 'modulelist', etc.)
+        iteration_count: Number of iterations if is_loop is True
     """
 
     op_type: str
     op_name: str
     params_count: int = 0
     is_composite: bool = False
+    is_loop: bool = False
+    loop_type: Optional[str] = None
+    iteration_count: Optional[int] = None
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary representation."""
@@ -318,6 +324,9 @@ class OperationInfo:
             "op_name": self.op_name,
             "params_count": self.params_count,
             "is_composite": self.is_composite,
+            "is_loop": self.is_loop,
+            "loop_type": self.loop_type,
+            "iteration_count": self.iteration_count,
         }
 
 

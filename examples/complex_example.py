@@ -17,9 +17,15 @@ Usage:
 import torch
 import torch.nn as nn
 import math
+from pathlib import Path
 from vode.capture.static_capture import capture_static_execution_graph
 from vode.capture.dynamic_capture import capture_dynamic_execution_graph
 from vode.visualize.graphviz_renderer import render_execution_graph, expand_to_depth
+
+# Output directory setup
+SCRIPT_DIR = Path(__file__).parent
+OUTPUT_DIR = SCRIPT_DIR / "output" / "complex"
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 
 class MultiHeadAttention(nn.Module):

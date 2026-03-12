@@ -1,9 +1,16 @@
 """Command-line interface for VODE.
 
+Provides commands for:
+- trace: Capture model execution (function flow or computation flow)
+- export: Export static visualization
+- view: Interactive visualization (future)
+- editor: Visual programming interface (future)
+
 Usage:
-    vode [options] script.py [script_args...]
     vode trace [options] script.py [script_args...]
-    vode view [options] graph_file
+    vode export [options] trace_file output_file
+    vode view [options] trace_file
+    vode script.py  # Direct visualization (shortcut)
 """
 
 import argparse
@@ -12,10 +19,20 @@ import runpy
 from pathlib import Path
 from typing import Any, List
 
-# Stage 4 imports
-from vode.capture.static_capture import capture_static_execution_graph
-from vode.capture.dynamic_capture import capture_dynamic_execution_graph
-from vode.visualize.graphviz_renderer import render_execution_graph
+# Import from reorganized modules
+from vode.capture import (
+    capture_static,
+    capture_dynamic,
+    capture_static_execution_graph,
+    capture_dynamic_execution_graph,
+)
+from vode.core import save_graph, load_graph
+from vode.visualize import visualize, start_server
+from vode.visualize.graphviz_renderer import (
+    render_execution_graph,
+    expand_to_depth,
+    flatten_to_sequence,
+)
 
 # Global registry for tracking created models
 _model_registry: List[Any] = []
@@ -202,7 +219,14 @@ def cmd_visualize(args):
                     format_to_use = args.format
             else:
                 format_to_use = args.format
-                output_path = f"{script_path.stem}_stage4.{format_to_use}"
+                # Save to output directory if it exists, otherwise current directory
+                output_dir = script_path.parent / "output" / script_path.stem
+                if output_dir.exists():
+                    output_path = str(
+                        output_dir / f"{script_path.stem}_stage4.{format_to_use}"
+                    )
+                else:
+                    output_path = f"{script_path.stem}_stage4.{format_to_use}"
 
             # Save output
             if format_to_use == "gv":

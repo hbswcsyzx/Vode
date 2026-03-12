@@ -1,79 +1,103 @@
-"""Simple VODE usage example.
+"""Simple VODE Example: Basic Sequential Model
 
-Demonstrates basic static and dynamic capture with a small model.
+This example demonstrates basic VODE usage with a simple feedforward neural network.
+The model consists of three linear layers with ReLU activations.
 
-NOTE: Run from workspace root with vode in PYTHONPATH:
-    cd /path/to/workspace
-    python vode/examples/simple_example.py
+Usage:
+    python simple_example.py
+    
+    # Or visualize with VODE CLI:
+    vode --stage4 --depth 1 simple_example.py
 """
-
-import sys
-from pathlib import Path
-
-# Add vode to path (if not installed)
-vode_path = Path(__file__).parent.parent.parent
-if vode_path.exists():
-    sys.path.insert(0, str(vode_path))
 
 import torch
 import torch.nn as nn
-from vode.visualize import vode
+from vode.capture.static_capture import capture_static_execution_graph
+from vode.capture.dynamic_capture import capture_dynamic_execution_graph
+from vode.visualize.graphviz_renderer import render_execution_graph
 
 
-# Define a simple model
-class SimpleNet(nn.Module):
-    """Simple feedforward network."""
-
-    def __init__(self):
+class SimpleModel(nn.Module):
+    """Simple feedforward neural network.
+    
+    Architecture:
+        Input (10) -> Linear (20) -> ReLU -> Linear (20) -> ReLU -> Linear (10)
+    """
+    
+    def __init__(self, input_size=10, hidden_size=20, output_size=10):
         super().__init__()
-        self.fc1 = nn.Linear(10, 20)
-        self.relu = nn.ReLU()
-        self.fc2 = nn.Linear(20, 10)
-
+        self.fc1 = nn.Linear(input_size, hidden_size)
+        self.relu1 = nn.ReLU()
+        self.fc2 = nn.Linear(hidden_size, hidden_size)
+        self.relu2 = nn.ReLU()
+        self.fc3 = nn.Linear(hidden_size, output_size)
+    
     def forward(self, x):
+        """Forward pass through the network."""
         x = self.fc1(x)
-        x = self.relu(x)
+        x = self.relu1(x)
         x = self.fc2(x)
+        x = self.relu2(x)
+        x = self.fc3(x)
         return x
 
 
 def main():
-    """Run simple examples."""
-    print("VODE Simple Example")
-    print("=" * 50)
-
+    """Main function demonstrating VODE usage."""
+    print("=" * 60)
+    print("VODE Simple Example: Basic Sequential Model")
+    print("=" * 60)
+    
     # Create model
-    model = SimpleNet()
-    print(f"\nModel: {model.__class__.__name__}")
-
-    # Example 1: Static capture (no input needed)
-    print("\n1. Static capture (structure only)...")
-    output_path = vode(model, mode="static", output="simple_static.svg")
-    print(f"   Generated: {output_path}")
-
-    # Example 2: Dynamic capture (with input)
-    print("\n2. Dynamic capture (with tensor shapes)...")
-    x = torch.randn(1, 10)
-    output_path = vode(
-        model, x, mode="dynamic", output="simple_dynamic.svg", compute_stats=True
-    )
-    print(f"   Generated: {output_path}")
-
-    # Example 3: Different formats
-    print("\n3. Different output formats...")
-    vode(model, mode="static", output="simple.png", format="png")
-    print(f"   Generated: simple.png")
-
-    vode(model, mode="static", output="simple.gv", format="gv")
-    print(f"   Generated: simple.gv (Graphviz source)")
-
-    print("\n" + "=" * 50)
-    print("Examples completed successfully!")
-    print("\nGenerated files:")
-    print("  - simple_static.svg")
-    print("  - simple_dynamic.svg")
-    print("  - simple.png")
-    print("  - simple.gv")
+    print("\n1. Creating model...")
+    model = SimpleModel(input_size=10, hidden_size=20, output_size=10)
+    print(f"   Model: {model.__class__.__name__}")
+    print(f"   Parameters: {sum(p.numel() for p in model.parameters()):,}")
+    
+    # Static capture (no forward pass needed)
+    print("\n2. Static capture (structure only)...")
+    static_root = capture_static_execution_graph(model)
+    print(f"   Captured root node: {static_root.name}")
+    print(f"   Number of children: {len(static_root.children)}")
+    print(f"   Is expandable: {static_root.is_expandable}")
+    
+    # Dynamic capture (with sample input)
+    print("\n3. Dynamic capture (with runtime data)...")
+    sample_input = torch.randn(1, 10)
+    dynamic_root = capture_dynamic_execution_graph(model, sample_input)
+    print(f"   Input shape: {dynamic_root.inputs[0].shape if dynamic_root.inputs else 'N/A'}")
+    print(f"   Output shape: {dynamic_root.outputs[0].shape if dynamic_root.outputs else 'N/A'}")
+    
+    # Render at different depths
+    print("\n4. Rendering visualizations...")
+    
+    # Depth 0: Show only root
+    print("   - Depth 0 (root only)...")
+    dot_depth0 = render_execution_graph(static_root, max_depth=0)
+    with open("simple_depth0.gv", "w") as f:
+        f.write(dot_depth0.source)
+    print("     Saved to: simple_depth0.gv")
+    
+    # Depth 1: Show immediate children
+    print("   - Depth 1 (one level)...")
+    dot_depth1 = render_execution_graph(static_root, max_depth=1)
+    with open("simple_depth1.gv", "w") as f:
+        f.write(dot_depth1.source)
+    print("     Saved to: simple_depth1.gv")
+    
+    # Dynamic visualization with shapes
+    print("   - Dynamic (with shapes)...")
+    dot_dynamic = render_execution_graph(dynamic_root, max_depth=1)
+    with open("simple_dynamic.gv", "w") as f:
+        f.write(dot_dynamic.source)
+    print("     Saved to: simple_dynamic.gv")
+    
+    print("\n" + "=" * 60)
+    print("Example completed successfully!")
+    print("=" * 60)
+    print("\nTo visualize the .gv files:")
+    print("  dot -Tpng simple_depth1.gv -o simple_depth1.png")
+    print("  dot -Tsvg simple_dynamic.gv -o simple_dynamic.svg")
 
 
 if __name__ == "__main__":

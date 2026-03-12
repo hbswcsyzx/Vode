@@ -517,14 +517,8 @@ class GraphvizRenderer:
         # Format outputs
         outputs_html = self._format_tensors_for_column(node.outputs)
 
-        # Build three-column table
-        html = f"""TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
-<TR>
-<TD BGCOLOR="lightyellow">{inputs_html}</TD>
-<TD BGCOLOR="darkseagreen1">{op_html}</TD>
-<TD BGCOLOR="lightyellow">{outputs_html}</TD>
-</TR>
-</TABLE"""
+        # Build three-column table (single line for DOT syntax compatibility)
+        html = f'<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4"><TR><TD BGCOLOR="lightyellow">{inputs_html}</TD><TD BGCOLOR="darkseagreen1">{op_html}</TD><TD BGCOLOR="lightyellow">{outputs_html}</TD></TR></TABLE>'
         return html
 
     def _format_tensors_for_column(self, tensors: list[TensorInfo]) -> str:

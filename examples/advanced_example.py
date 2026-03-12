@@ -1,226 +1,288 @@
-"""Advanced VODE usage example.
+"""Advanced VODE Example: ResNet-style Architecture
 
-Demonstrates depth control, loop detection, and complex model visualization.
+This example demonstrates VODE with a more complex architecture featuring:
+- Custom residual blocks
+- Skip connections
+- Nested Sequential modules
+- Multiple module types
 
-NOTE: Run from workspace root with vode in PYTHONPATH:
-    cd /path/to/workspace
-    python vode/examples/advanced_example.py
+Usage:
+    python advanced_example.py
+
+    # Or visualize with VODE CLI:
+    vode --stage4 --depth 2 advanced_example.py
 """
-
-import sys
-from pathlib import Path
-
-# Add vode to path (if not installed)
-vode_path = Path(__file__).parent.parent.parent
-if vode_path.exists():
-    sys.path.insert(0, str(vode_path))
 
 import torch
 import torch.nn as nn
-from vode.capture import capture_static, capture_dynamic
-from vode.visualize import visualize
+from vode.capture.static_capture import capture_static_execution_graph
+from vode.capture.dynamic_capture import capture_dynamic_execution_graph
+from vode.visualize.graphviz_renderer import render_execution_graph, expand_to_depth
 
 
-# Define a complex model with nested modules
-class ConvBlock(nn.Module):
-    """Convolutional block with batch norm and activation."""
+class ResidualBlock(nn.Module):
+    """Residual block with skip connection.
+
+    Implements: output = F(x) + x
+    where F(x) is a two-layer network with ReLU activation.
+    """
+
+    def __init__(self, features):
+        super().__init__()
+        self.conv1 = nn.Conv2d(features, features, kernel_size=3, padding=1)
+        self.bn1 = nn.BatchNorm2d(features)
+        self.relu = nn.ReLU(inplace=True)
+        self.conv2 = nn.Conv2d(features, features, kernel_size=3, padding=1)
+        self.bn2 = nn.BatchNorm2d(features)
+
+    def forward(self, x):
+        """Forward pass with residual connection."""
+        identity = x
+
+        out = self.conv1(x)
+        out = self.bn1(out)
+        out = self.relu(out)
+
+        out = self.conv2(out)
+        out = self.bn2(out)
+
+        out += identity  # Skip connection
+        out = self.relu(out)
+
+        return out
+
+
+class DownsampleBlock(nn.Module):
+    """Downsampling block that reduces spatial dimensions.
+
+    Uses strided convolution to downsample while increasing channels.
+    """
 
     def __init__(self, in_channels, out_channels):
         super().__init__()
-        self.conv = nn.Conv2d(in_channels, out_channels, 3, padding=1)
+        self.conv = nn.Conv2d(
+            in_channels, out_channels, kernel_size=3, stride=2, padding=1
+        )
         self.bn = nn.BatchNorm2d(out_channels)
-        self.relu = nn.ReLU()
+        self.relu = nn.ReLU(inplace=True)
 
     def forward(self, x):
+        """Forward pass with downsampling."""
         x = self.conv(x)
         x = self.bn(x)
         x = self.relu(x)
         return x
 
 
-class ResidualBlock(nn.Module):
-    """Residual block with skip connection."""
+class ResNetStage(nn.Module):
+    """A stage in ResNet consisting of multiple residual blocks.
 
-    def __init__(self, channels):
+    Each stage maintains the same spatial dimensions and channel count.
+    """
+
+    def __init__(self, features, num_blocks=2):
         super().__init__()
-        self.conv1 = ConvBlock(channels, channels)
-        self.conv2 = ConvBlock(channels, channels)
-
-    def forward(self, x):
-        identity = x
-        out = self.conv1(x)
-        out = self.conv2(out)
-        out = out + identity  # Skip connection
-        return out
-
-
-class ComplexNet(nn.Module):
-    """Complex network with multiple levels of nesting."""
-
-    def __init__(self):
-        super().__init__()
-        self.input_conv = ConvBlock(3, 64)
-
-        # Use Sequential (detected as loop)
-        self.res_blocks = nn.Sequential(
-            ResidualBlock(64),
-            ResidualBlock(64),
-            ResidualBlock(64),
+        self.blocks = nn.ModuleList(
+            [ResidualBlock(features) for _ in range(num_blocks)]
         )
 
-        self.pool = nn.AdaptiveAvgPool2d((1, 1))
-        self.fc = nn.Linear(64, 10)
-
     def forward(self, x):
-        x = self.input_conv(x)
-        x = self.res_blocks(x)
-        x = self.pool(x)
-        x = x.view(x.size(0), -1)
-        x = self.fc(x)
+        """Forward pass through all blocks in the stage."""
+        for block in self.blocks:
+            x = block(x)
         return x
 
 
-def demonstrate_depth_control():
-    """Show how depth control helps visualize large models."""
-    print("\nDEPTH CONTROL DEMONSTRATION")
-    print("=" * 50)
+class AdvancedModel(nn.Module):
+    """Advanced ResNet-style model with multiple stages.
 
-    model = ComplexNet()
+    Architecture:
+        - Initial convolution (3 -> 64 channels)
+        - Stage 1: 2 residual blocks (64 channels, 32x32)
+        - Downsample (64 -> 128 channels, 16x16)
+        - Stage 2: 2 residual blocks (128 channels, 16x16)
+        - Downsample (128 -> 256 channels, 8x8)
+        - Stage 3: 2 residual blocks (256 channels, 8x8)
+        - Global average pooling
+        - Fully connected layer (256 -> num_classes)
+    """
 
-    # Full depth
-    print("\n1. Full depth (all modules)...")
-    graph = capture_static(model)
-    print(f"   Captured {len(graph.nodes)} nodes")
-    visualize(graph, output_path="complex_full.svg")
-    print(f"   Generated: complex_full.svg")
+    def __init__(self, num_classes=10):
+        super().__init__()
 
-    # Depth 3 (high-level overview)
-    print("\n2. Depth 3 (high-level overview)...")
-    visualize(graph, output_path="complex_d3.svg", max_depth=3)
-    print(f"   Generated: complex_d3.svg")
+        # Initial convolution
+        self.initial = nn.Sequential(
+            nn.Conv2d(3, 64, kernel_size=7, stride=1, padding=3),
+            nn.BatchNorm2d(64),
+            nn.ReLU(inplace=True),
+        )
 
-    # Depth 5 (medium detail)
-    print("\n3. Depth 5 (medium detail)...")
-    visualize(graph, output_path="complex_d5.svg", max_depth=5)
-    print(f"   Generated: complex_d5.svg")
+        # Stage 1: 64 channels
+        self.stage1 = ResNetStage(features=64, num_blocks=2)
 
+        # Downsample to 128 channels
+        self.downsample1 = DownsampleBlock(64, 128)
 
-def demonstrate_loop_detection():
-    """Show loop detection for Sequential and ModuleList."""
-    print("\n\nLOOP DETECTION DEMONSTRATION")
-    print("=" * 50)
+        # Stage 2: 128 channels
+        self.stage2 = ResNetStage(features=128, num_blocks=2)
 
-    # Model with Sequential (detected as loop)
-    model = nn.Sequential(
-        nn.Linear(10, 20),
-        nn.ReLU(),
-        nn.Linear(20, 20),
-        nn.ReLU(),
-        nn.Linear(20, 10),
-    )
+        # Downsample to 256 channels
+        self.downsample2 = DownsampleBlock(128, 256)
 
-    print("\n1. Sequential model (detected as loop)...")
-    graph = capture_static(model)
-    print(f"   Captured {len(graph.nodes)} nodes")
-    print(f"   Detected {len(graph.detected_loops)} loops")
+        # Stage 3: 256 channels
+        self.stage3 = ResNetStage(features=256, num_blocks=2)
 
-    # Collapsed view
-    print("\n2. Collapsed loop view...")
-    visualize(graph, output_path="loop_collapsed.svg", collapse_loops=True)
-    print(f"   Generated: loop_collapsed.svg")
+        # Classification head
+        self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
+        self.fc = nn.Linear(256, num_classes)
 
-    # Expanded view
-    print("\n3. Expanded loop view...")
-    visualize(graph, output_path="loop_expanded.svg", collapse_loops=False)
-    print(f"   Generated: loop_expanded.svg")
+    def forward(self, x):
+        """Forward pass through the network."""
+        x = self.initial(x)
 
+        x = self.stage1(x)
+        x = self.downsample1(x)
 
-def demonstrate_dynamic_capture():
-    """Show dynamic capture with tensor metadata."""
-    print("\n\nDYNAMIC CAPTURE DEMONSTRATION")
-    print("=" * 50)
+        x = self.stage2(x)
+        x = self.downsample2(x)
 
-    model = ComplexNet()
-    x = torch.randn(2, 3, 32, 32)
+        x = self.stage3(x)
 
-    print("\n1. Dynamic capture without statistics...")
-    graph = capture_dynamic(model, x, compute_stats=False)
-    print(f"   Captured {len(graph.nodes)} nodes")
-    visualize(graph, output_path="dynamic_no_stats.svg")
-    print(f"   Generated: dynamic_no_stats.svg")
+        x = self.avgpool(x)
+        x = torch.flatten(x, 1)
+        x = self.fc(x)
 
-    print("\n2. Dynamic capture with statistics...")
-    graph = capture_dynamic(model, x, compute_stats=True)
-    print(f"   Captured {len(graph.nodes)} nodes")
-    visualize(graph, output_path="dynamic_with_stats.svg")
-    print(f"   Generated: dynamic_with_stats.svg")
-
-    # Show some tensor metadata
-    print("\n3. Sample tensor metadata:")
-    for node_id, node in list(graph.nodes.items())[:3]:
-        if hasattr(node, "shape"):
-            print(f"   - {node.name}: shape={node.shape}, dtype={node.dtype}")
+        return x
 
 
-def demonstrate_separate_api():
-    """Show separate capture and visualization API."""
-    print("\n\nSEPARATE API DEMONSTRATION")
-    print("=" * 50)
+def print_model_summary(model):
+    """Print a summary of the model architecture."""
+    print("\nModel Summary:")
+    print("-" * 60)
 
-    model = ComplexNet()
+    total_params = 0
+    trainable_params = 0
 
-    print("\n1. Capture once...")
-    graph = capture_static(model)
-    print(f"   Captured {len(graph.nodes)} nodes")
+    for name, module in model.named_modules():
+        if len(list(module.children())) == 0:  # Leaf module
+            params = sum(p.numel() for p in module.parameters())
+            trainable = sum(p.numel() for p in module.parameters() if p.requires_grad)
 
-    print("\n2. Visualize multiple times with different settings...")
+            if params > 0:
+                print(f"{name:40s} {params:>10,} params")
+                total_params += params
+                trainable_params += trainable
 
-    # Different depths
-    visualize(graph, output_path="separate_d3.svg", max_depth=3)
-    print(f"   Generated: separate_d3.svg (depth 3)")
+    print("-" * 60)
+    print(f"{'Total Parameters':40s} {total_params:>10,}")
+    print(f"{'Trainable Parameters':40s} {trainable_params:>10,}")
+    print("-" * 60)
 
-    visualize(graph, output_path="separate_d5.svg", max_depth=5)
-    print(f"   Generated: separate_d5.svg (depth 5)")
 
-    # Different formats
-    visualize(graph, output_path="separate.png", format="png")
-    print(f"   Generated: separate.png")
+def demonstrate_depth_expansion(root):
+    """Demonstrate expansion at different depths."""
+    print("\nDepth Expansion Demonstration:")
+    print("-" * 60)
 
-    # Different orientations
-    visualize(graph, output_path="separate_tb.svg", rankdir="TB")
-    print(f"   Generated: separate_tb.svg (top-bottom layout)")
+    for depth in range(4):
+        expanded = expand_to_depth(root, max_depth=depth)
+        print(f"Depth {depth}: {len(expanded)} nodes")
+
+        if depth <= 2:
+            for i, node in enumerate(expanded[:5]):  # Show first 5
+                print(f"  [{i}] {node.operation.op_type:15s} - {node.name}")
+            if len(expanded) > 5:
+                print(f"  ... and {len(expanded) - 5} more nodes")
 
 
 def main():
-    """Run all advanced examples."""
-    print("\n" + "=" * 70)
-    print("VODE ADVANCED EXAMPLES")
-    print("=" * 70)
+    """Main function demonstrating advanced VODE usage."""
+    print("=" * 60)
+    print("VODE Advanced Example: ResNet-style Architecture")
+    print("=" * 60)
 
-    try:
-        demonstrate_depth_control()
-        demonstrate_loop_detection()
-        demonstrate_dynamic_capture()
-        demonstrate_separate_api()
+    # Create model
+    print("\n1. Creating advanced model...")
+    model = AdvancedModel(num_classes=10)
+    print(f"   Model: {model.__class__.__name__}")
 
-        print("\n" + "=" * 70)
-        print("ALL EXAMPLES COMPLETED SUCCESSFULLY!")
-        print("=" * 70)
-        print("\nKey takeaways:")
-        print("  - Use max_depth to control visualization complexity")
-        print("  - Sequential/ModuleList are detected as loops")
-        print("  - Dynamic capture provides tensor shapes and statistics")
-        print("  - Capture once, visualize many times with different settings")
+    # Print model summary
+    print_model_summary(model)
 
-    except Exception as e:
-        print(f"\n❌ Error: {e}")
-        import traceback
+    # Static capture
+    print("\n2. Static capture (structure only)...")
+    static_root = capture_static_execution_graph(model)
+    print(f"   Root node: {static_root.name}")
+    print(f"   Number of direct children: {len(static_root.children)}")
+    print(f"   Is expandable: {static_root.is_expandable}")
 
-        traceback.print_exc()
-        return 1
+    # Show hierarchy
+    print("\n   Model hierarchy:")
+    for i, child in enumerate(static_root.children):
+        print(f"   [{i}] {child.operation.op_type:15s} - {child.name}")
+        if child.is_expandable:
+            print(f"       └─ {len(child.children)} sub-modules")
 
-    return 0
+    # Demonstrate depth expansion
+    demonstrate_depth_expansion(static_root)
+
+    # Dynamic capture
+    print("\n3. Dynamic capture (with runtime data)...")
+    sample_input = torch.randn(1, 3, 32, 32)
+    print(f"   Sample input shape: {tuple(sample_input.shape)}")
+
+    dynamic_root = capture_dynamic_execution_graph(model, sample_input)
+    print(
+        f"   Input shape: {dynamic_root.inputs[0].shape if dynamic_root.inputs else 'N/A'}"
+    )
+    print(
+        f"   Output shape: {dynamic_root.outputs[0].shape if dynamic_root.outputs else 'N/A'}"
+    )
+
+    # Render at different depths
+    print("\n4. Rendering visualizations...")
+
+    # Depth 0: Show only root
+    print("   - Depth 0 (root only)...")
+    dot_depth0 = render_execution_graph(static_root, max_depth=0)
+    with open("advanced_depth0.gv", "w") as f:
+        f.write(dot_depth0.source)
+    print("     Saved to: advanced_depth0.gv")
+
+    # Depth 1: Show main stages
+    print("   - Depth 1 (main stages)...")
+    dot_depth1 = render_execution_graph(static_root, max_depth=1)
+    with open("advanced_depth1.gv", "w") as f:
+        f.write(dot_depth1.source)
+    print("     Saved to: advanced_depth1.gv")
+
+    # Depth 2: Show stage internals
+    print("   - Depth 2 (stage internals)...")
+    dot_depth2 = render_execution_graph(static_root, max_depth=2)
+    with open("advanced_depth2.gv", "w") as f:
+        f.write(dot_depth2.source)
+    print("     Saved to: advanced_depth2.gv")
+
+    # Dynamic visualization
+    print("   - Dynamic (with shapes)...")
+    dot_dynamic = render_execution_graph(dynamic_root, max_depth=1)
+    with open("advanced_dynamic.gv", "w") as f:
+        f.write(dot_dynamic.source)
+    print("     Saved to: advanced_dynamic.gv")
+
+    print("\n" + "=" * 60)
+    print("Example completed successfully!")
+    print("=" * 60)
+    print("\nKey Features Demonstrated:")
+    print("  ✓ Custom residual blocks with skip connections")
+    print("  ✓ Nested Sequential modules")
+    print("  ✓ ModuleList for repeated blocks")
+    print("  ✓ Multi-stage architecture")
+    print("  ✓ Depth-based expansion control")
+    print("\nTo visualize the .gv files:")
+    print("  dot -Tpng advanced_depth1.gv -o advanced_depth1.png")
+    print("  dot -Tsvg advanced_depth2.gv -o advanced_depth2.svg")
 
 
 if __name__ == "__main__":
-    exit(main())
+    main()

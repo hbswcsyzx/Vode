@@ -7,8 +7,8 @@ from typing import Any, Literal
 
 import torch.nn as nn
 
-from vode.capture import capture_static, capture_dynamic
-from vode.visualize import visualize
+from vode.capture import capture_static_execution_graph, capture_dynamic_execution_graph
+from vode.visualize.graphviz_renderer import render_execution_graph
 
 
 def vode(
@@ -16,11 +16,8 @@ def vode(
     *args: Any,
     mode: Literal["static", "dynamic"] = "static",
     output: str = "model.svg",
-    max_depth: int | None = None,
-    format: Literal["svg", "png", "pdf", "gv"] = "svg",
+    max_depth: int = 1,
     rankdir: Literal["LR", "TB"] = "LR",
-    collapse_loops: bool = True,
-    compute_stats: bool = False,
     **kwargs: Any,
 ) -> str:
     """All-in-one function: capture computation graph and visualize it.
@@ -33,11 +30,8 @@ def vode(
         *args: Input arguments to pass to the model (required for dynamic mode)
         mode: Capture mode ('static' or 'dynamic')
         output: Output file path (default: 'model.svg')
-        max_depth: Maximum depth to render (None for full tree)
-        format: Output format ('svg', 'png', 'pdf', 'gv')
+        max_depth: Maximum depth to render (default: 1)
         rankdir: Graph direction ('LR' for left-right, 'TB' for top-bottom)
-        collapse_loops: Whether to collapse loop nodes
-        compute_stats: Whether to compute tensor statistics (dynamic mode only)
         **kwargs: Additional keyword arguments to pass to the model (dynamic mode)
 
     Returns:
@@ -71,30 +65,33 @@ def vode(
             "Dynamic mode requires input arguments. Pass model inputs as positional arguments."
         )
 
-    # Infer format from output path if not explicitly set
-    if format == "svg" and output != "model.svg":
-        # Check if output has a different extension
-        if output.endswith(".png"):
-            format = "png"
-        elif output.endswith(".pdf"):
-            format = "pdf"
-        elif output.endswith(".gv"):
-            format = "gv"
+    # Infer format from output path
+    format = "svg"
+    if output.endswith(".png"):
+        format = "png"
+    elif output.endswith(".pdf"):
+        format = "pdf"
+    elif output.endswith(".gv"):
+        format = "gv"
 
-    # Capture computation graph
+    # Capture execution graph
     if mode == "static":
-        graph = capture_static(model)
+        root = capture_static_execution_graph(model)
     else:
-        graph = capture_dynamic(model, *args, compute_stats=compute_stats, **kwargs)
+        # For dynamic mode, pass the first arg as input_data
+        root = capture_dynamic_execution_graph(model, args[0] if args else None)
 
-    # Visualize
-    output_path = visualize(
-        graph=graph,
-        output_path=output,
-        max_depth=max_depth,
-        format=format,
-        rankdir=rankdir,
-        collapse_loops=collapse_loops,
-    )
+    # Render to graphviz
+    dot = render_execution_graph(root, max_depth=max_depth, rankdir=rankdir)
 
-    return output_path
+    # Save output
+    if format == "gv":
+        # Save DOT source directly
+        with open(output, "w") as f:
+            f.write(dot.source)
+        return output
+    else:
+        # Render to image format
+        output_base = output.rsplit(".", 1)[0] if "." in output else output
+        rendered_path = dot.render(output_base, format=format, cleanup=True)
+        return rendered_path

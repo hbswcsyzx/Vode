@@ -1,95 +1,16 @@
 """Data validation for VODE graphs.
 
-Validates ComputationGraph and ExecutionNode structures for correctness.
+Validates ExecutionNode structures for correctness.
 """
 
 from typing import Any
-from .graph import ComputationGraph
-from .nodes import Node, ExecutionNode
+from .nodes import ExecutionNode
 
 
 class ValidationError(Exception):
     """Raised when graph validation fails."""
 
     pass
-
-
-def validate_graph(graph: ComputationGraph) -> bool:
-    """Validate a ComputationGraph for structural correctness.
-
-    Args:
-        graph: ComputationGraph to validate
-
-    Returns:
-        True if valid
-
-    Raises:
-        ValidationError: If graph is invalid
-    """
-    # Check that all nodes have unique IDs
-    node_ids = set()
-    for node_id in graph.nodes.keys():
-        if node_id in node_ids:
-            raise ValidationError(f"Duplicate node ID: {node_id}")
-        node_ids.add(node_id)
-
-    # Check that all edges reference existing nodes
-    for source_id, target_id in graph.edges:
-        if source_id not in graph.nodes:
-            raise ValidationError(
-                f"Edge references non-existent source node: {source_id}"
-            )
-        if target_id not in graph.nodes:
-            raise ValidationError(
-                f"Edge references non-existent target node: {target_id}"
-            )
-
-    # Check that all root nodes exist
-    for root_id in graph.root_node_ids:
-        if root_id not in graph.nodes:
-            raise ValidationError(f"Root node does not exist: {root_id}")
-
-    # Check that hierarchy references valid nodes
-    for parent_id, child_ids in graph.node_hierarchy.items():
-        if parent_id not in graph.nodes:
-            raise ValidationError(
-                f"Hierarchy references non-existent parent: {parent_id}"
-            )
-        for child_id in child_ids:
-            if child_id not in graph.nodes:
-                raise ValidationError(
-                    f"Hierarchy references non-existent child: {child_id}"
-                )
-
-    # Check that parent-child relationships are consistent
-    for node_id, node in graph.nodes.items():
-        # Check parents
-        for parent_id in node.parents:
-            if parent_id not in graph.nodes:
-                raise ValidationError(
-                    f"Node {node_id} references non-existent parent: {parent_id}"
-                )
-            parent = graph.nodes[parent_id]
-            if node_id not in parent.children:
-                raise ValidationError(
-                    f"Parent-child relationship inconsistent: "
-                    f"{parent_id} -> {node_id}"
-                )
-
-        # Check children
-        for child_id in node.children:
-            if child_id not in graph.nodes:
-                raise ValidationError(
-                    f"Node {node_id} references non-existent child: {child_id}"
-                )
-            child = graph.nodes[child_id]
-            if node_id not in child.parents:
-                raise ValidationError(
-                    f"Parent-child relationship inconsistent: "
-                    f"{node_id} -> {child_id}"
-                )
-
-    return True
 
 
 def validate_execution_node(node: ExecutionNode) -> bool:

@@ -8,9 +8,6 @@ Provides tools to visualize computation graphs:
 # Graphviz renderer
 from .graphviz_renderer import GraphvizRenderer
 
-# High-level visualization API
-from .visualizer import visualize, visualize_static, visualize_dynamic
-
 # Wrapper function
 from .vode_wrapper import vode
 
@@ -23,10 +20,6 @@ from .routes import router
 __all__ = [
     # Renderer
     "GraphvizRenderer",
-    # Visualization API
-    "visualize",
-    "visualize_static",
-    "visualize_dynamic",
     # Wrapper
     "vode",
     # Server (optional)

@@ -10,16 +10,9 @@ Both static (structure-only) and dynamic (runtime) capture are supported.
 # Base tracer
 from .base import BaseTracer
 
-# Function flow capture (sys.settrace)
-from .function_tracer import FunctionTracer, capture_function_flow
-
-# Computation flow capture (PyTorch hooks) - unified static and dynamic
+# Computation flow capture (PyTorch hooks) - ExecutionNode API only
 from .computation_tracer import (
-    StaticCapture,
-    capture_static,
     capture_static_execution_graph,
-    DynamicCapture,
-    capture_dynamic,
     DynamicExecutionCapture,
     capture_dynamic_execution_graph,
 )
@@ -31,16 +24,9 @@ from .recorder_tensor import RecorderTensor
 __all__ = [
     # Base
     "BaseTracer",
-    # Function flow
-    "FunctionTracer",
-    "capture_function_flow",
     # Computation flow - static
-    "StaticCapture",
-    "capture_static",
     "capture_static_execution_graph",
     # Computation flow - dynamic
-    "DynamicCapture",
-    "capture_dynamic",
     "DynamicExecutionCapture",
     "capture_dynamic_execution_graph",
     # Utilities

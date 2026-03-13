@@ -12,7 +12,6 @@ from vode.visualize.graphviz_renderer import (
     flatten_to_sequence,
     GraphvizRenderer,
 )
-from vode.core.graph import ComputationGraph
 from vode.capture.computation_tracer import capture_static_execution_graph
 from vode.capture.computation_tracer import capture_dynamic_execution_graph
 
@@ -276,8 +275,7 @@ class TestGraphvizRendererExecutionGraph:
         root = capture_static_execution_graph(model)
 
         # Create renderer
-        dummy_graph = ComputationGraph()
-        renderer = GraphvizRenderer(dummy_graph)
+        renderer = GraphvizRenderer()
 
         # Render at depth 1
         dot_string = renderer.render_execution_graph(root, max_depth=1)
@@ -297,8 +295,7 @@ class TestGraphvizRendererExecutionGraph:
 
         root = capture_static_execution_graph(model)
 
-        dummy_graph = ComputationGraph()
-        renderer = GraphvizRenderer(dummy_graph)
+        renderer = GraphvizRenderer()
 
         # Render at depth 0 (only root)
         dot_string = renderer.render_execution_graph(root, max_depth=0)
@@ -315,8 +312,7 @@ class TestGraphvizRendererExecutionGraph:
 
         root = capture_dynamic_execution_graph(model, x)
 
-        dummy_graph = ComputationGraph()
-        renderer = GraphvizRenderer(dummy_graph)
+        renderer = GraphvizRenderer()
 
         dot_string = renderer.render_execution_graph(root, max_depth=0)
 
@@ -343,8 +339,7 @@ class TestGraphvizRendererExecutionGraph:
 
         root = capture_static_execution_graph(model)
 
-        dummy_graph = ComputationGraph()
-        renderer = GraphvizRenderer(dummy_graph)
+        renderer = GraphvizRenderer()
 
         # Render at depth 1
         dot_string = renderer.render_execution_graph(root, max_depth=1)
@@ -358,8 +353,7 @@ class TestGraphvizRendererExecutionGraph:
         model = nn.Linear(10, 20)
         root = capture_static_execution_graph(model)
 
-        dummy_graph = ComputationGraph()
-        renderer = GraphvizRenderer(dummy_graph)
+        renderer = GraphvizRenderer()
 
         # Test LR (left-right)
         dot_lr = renderer.render_execution_graph(root, max_depth=0, rankdir="LR")
@@ -375,8 +369,7 @@ class TestGraphvizRendererHelpers:
 
     def test_format_shape(self):
         """Test _format_shape method."""
-        dummy_graph = ComputationGraph()
-        renderer = GraphvizRenderer(dummy_graph)
+        renderer = GraphvizRenderer()
 
         # Test normal shape
         assert renderer._format_shape((1, 10, 20)) == "(1, 10, 20)"
@@ -389,8 +382,7 @@ class TestGraphvizRendererHelpers:
 
     def test_format_number(self):
         """Test _format_number method."""
-        dummy_graph = ComputationGraph()
-        renderer = GraphvizRenderer(dummy_graph)
+        renderer = GraphvizRenderer()
 
         # Test small numbers
         assert renderer._format_number(100) == "100"
@@ -410,8 +402,7 @@ class TestGraphvizRendererHelpers:
 
     def test_format_tensors_for_column(self):
         """Test _format_tensors_for_column method."""
-        dummy_graph = ComputationGraph()
-        renderer = GraphvizRenderer(dummy_graph)
+        renderer = GraphvizRenderer()
 
         # Test empty list
         assert renderer._format_tensors_for_column([]) == "-"
@@ -433,8 +424,7 @@ class TestGraphvizRendererHelpers:
 
     def test_format_operation_for_column(self):
         """Test _format_operation_for_column method."""
-        dummy_graph = ComputationGraph()
-        renderer = GraphvizRenderer(dummy_graph)
+        renderer = GraphvizRenderer()
 
         # Test simple operation
         op = OperationInfo(op_type="Linear", op_name="fc1", params_count=220)
@@ -479,8 +469,7 @@ class TestRenderExecutionNodeHTML:
             outputs=outputs,
         )
 
-        dummy_graph = ComputationGraph()
-        renderer = GraphvizRenderer(dummy_graph)
+        renderer = GraphvizRenderer()
 
         html = renderer._render_execution_node_html(node)
 
@@ -506,8 +495,7 @@ class TestRenderExecutionNodeHTML:
             outputs=[],
         )
 
-        dummy_graph = ComputationGraph()
-        renderer = GraphvizRenderer(dummy_graph)
+        renderer = GraphvizRenderer()
 
         html = renderer._render_execution_node_html(node)
 
@@ -532,8 +520,7 @@ class TestIntegration:
         root = capture_static_execution_graph(model)
 
         # Render
-        dummy_graph = ComputationGraph()
-        renderer = GraphvizRenderer(dummy_graph)
+        renderer = GraphvizRenderer()
         dot_string = renderer.render_execution_graph(root, max_depth=1)
 
         # Verify output
@@ -553,8 +540,7 @@ class TestIntegration:
         root = capture_dynamic_execution_graph(model, x)
 
         # Render
-        dummy_graph = ComputationGraph()
-        renderer = GraphvizRenderer(dummy_graph)
+        renderer = GraphvizRenderer()
         dot_string = renderer.render_execution_graph(root, max_depth=1)
 
         # Verify output includes shapes

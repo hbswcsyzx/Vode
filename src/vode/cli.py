@@ -25,8 +25,8 @@ from vode.capture import (
     capture_static_execution_graph,
     capture_dynamic_execution_graph,
 )
-from vode.core import save_graph, load_graph
-from vode.visualize import visualize, start_server
+from vode.core import save_execution_node, load_execution_node
+from vode.visualize import start_server
 from vode.visualize.graphviz_renderer import (
     render_execution_graph,
     expand_to_depth,
@@ -60,8 +60,7 @@ def _restore_model_tracking():
 
 def cmd_trace(args):
     """Trace command: capture model structure and save to file."""
-    from vode import capture_static, capture_dynamic
-    from vode.core.graph import ComputationGraph
+    from vode import capture_static_execution_graph
     import json
 
     # Track model creation
@@ -152,8 +151,6 @@ def cmd_trace(args):
 
 def cmd_view(args):
     """View command: visualize a saved trace or directly visualize a model."""
-    from vode import visualize
-    from vode.core.graph import ComputationGraph
     import json
 
     if args.graph_file:
@@ -174,7 +171,8 @@ def cmd_view(args):
 
 def cmd_visualize(args):
     """Visualize command: directly visualize a model from script."""
-    from vode import capture_static, visualize
+    from vode import capture_static_execution_graph
+    from vode.visualize.graphviz_renderer import render_execution_graph
 
     # Track model creation
     _track_model_creation()

@@ -11,15 +11,14 @@ Usage:
     python complex_example.py
 
     # Or visualize with VODE CLI:
-    vode --stage4 --depth 3 complex_example.py
+    vode --depth 3 complex_example.py
 """
 
 import torch
 import torch.nn as nn
 import math
 from pathlib import Path
-from vode.capture.static_capture import capture_static_execution_graph
-from vode.capture.dynamic_capture import capture_dynamic_execution_graph
+from vode.capture.computation_tracer import capture_static_execution_graph, capture_dynamic_execution_graph
 from vode.visualize.graphviz_renderer import render_execution_graph, expand_to_depth
 
 # Output directory setup

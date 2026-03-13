@@ -13,15 +13,11 @@ from .base import BaseTracer
 # Function flow capture (sys.settrace)
 from .function_tracer import FunctionTracer, capture_function_flow
 
-# Computation flow capture (PyTorch hooks)
+# Computation flow capture (PyTorch hooks) - unified static and dynamic
 from .computation_tracer import (
     StaticCapture,
     capture_static,
     capture_static_execution_graph,
-)
-
-# Import dynamic capture from dynamic_capture.py (keeping backward compatibility)
-from .dynamic_capture import (
     DynamicCapture,
     capture_dynamic,
     DynamicExecutionCapture,

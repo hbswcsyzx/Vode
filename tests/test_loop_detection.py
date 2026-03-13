@@ -10,8 +10,8 @@ import pytest
 import torch
 import torch.nn as nn
 
-from vode.capture.static_capture import capture_static_execution_graph
-from vode.capture.dynamic_capture import capture_dynamic_execution_graph
+from vode.capture.computation_tracer import capture_static_execution_graph
+from vode.capture.computation_tracer import capture_dynamic_execution_graph
 from vode.core.nodes import OperationInfo
 
 

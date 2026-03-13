@@ -83,13 +83,13 @@ Use the VODE command-line tool to analyze the script:
 
 ```bash
 # Simple example with depth 1
-vode --stage4 --depth 1 simple_example.py
+vode --depth 1 simple_example.py
 
 # Advanced example with depth 2
-vode --stage4 --depth 2 advanced_example.py
+vode --depth 2 advanced_example.py
 
 # Complex example with depth 3
-vode --stage4 --depth 3 complex_example.py
+vode --depth 3 complex_example.py
 ```
 
 **Output:**

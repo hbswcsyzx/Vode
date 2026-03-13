@@ -1,7 +1,6 @@
 """Graphviz renderer for VODE computation graphs.
 
 Renders ComputationGraph to graphviz DOT format with depth control.
-Also supports Stage 4 ExecutionNode rendering with three-column layout.
 """
 
 from typing import Any
@@ -445,7 +444,6 @@ class GraphvizRenderer:
             return str(num)
 
     # ========================================================================
-    # Stage 4: ExecutionNode Rendering with Three-Column Layout
     # ========================================================================
 
     def render_execution_graph(
@@ -453,7 +451,6 @@ class GraphvizRenderer:
     ) -> str:
         """Render ExecutionNode graph with three-column layout.
 
-        Implements the Stage 4 design: horizontal layout with INPUT | OPERATION | OUTPUT
         for each node, with depth-based recursive expansion.
 
         Args:
@@ -571,7 +568,6 @@ class GraphvizRenderer:
 
 
 # ============================================================================
-# Stage 4: Core Expansion Functions
 # ============================================================================
 
 
@@ -580,7 +576,6 @@ def expand_to_depth(
 ) -> list[ExecutionNode]:
     """Recursively expand nodes to specified depth.
 
-    This implements the depth-based expansion strategy from the Stage 4 design.
     At each depth level, we decide whether to show the node as-is (collapsed)
     or expand it into its children.
 
@@ -639,7 +634,6 @@ def flatten_to_sequence(nodes: list[ExecutionNode]) -> list[ExecutionNode]:
 
 
 # ============================================================================
-# Standalone API Function for Stage 4
 # ============================================================================
 
 

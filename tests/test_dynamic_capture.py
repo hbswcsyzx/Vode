@@ -6,7 +6,7 @@ Tests capture_dynamic_execution_graph() and runtime tensor information capture.
 import pytest
 import torch
 import torch.nn as nn
-from vode.capture.dynamic_capture import (
+from vode.capture.computation_tracer import (
     capture_dynamic_execution_graph,
     _tensor_to_tensor_info,
     _count_parameters,

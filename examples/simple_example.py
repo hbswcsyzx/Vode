@@ -8,7 +8,7 @@ Usage:
     python simple_example.py
 
     # Or visualize with VODE CLI:
-    vode --stage4 --depth 1 simple_example.py
+    vode --depth 1 simple_example.py
 """
 
 import os
@@ -25,8 +25,10 @@ OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 # Only import VODE if not being analyzed by VODE CLI
 # This prevents recursive analysis when using vode command
 if __name__ == "__main__":
-    from vode.capture.static_capture import capture_static_execution_graph
-    from vode.capture.dynamic_capture import capture_dynamic_execution_graph
+    from vode.capture.computation_tracer import (
+        capture_static_execution_graph,
+        capture_dynamic_execution_graph,
+    )
     from vode.visualize.graphviz_renderer import render_execution_graph
 
 

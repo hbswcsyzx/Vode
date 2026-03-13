@@ -1,7 +1,7 @@
 """FastAPI server for interactive VODE visualization.
 
 Provides REST API for loading and exploring computation graphs interactively.
-This is a placeholder for future implementation (Stage 3).
+This is a placeholder for future implementation.
 """
 
 from pathlib import Path

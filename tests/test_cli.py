@@ -23,13 +23,6 @@ class TestCLIArgumentParsing:
             # but we can test the argument structure
             pass
 
-    def test_stage4_flag(self):
-        """Test that --stage4 flag is recognized."""
-        # This is a structural test to ensure the flag exists
-        from vode.cli import main
-
-        # The CLI should accept --stage4 flag
-        test_args = ["vode", "--stage4", "script.py"]
         # We verify the structure exists by checking it doesn't raise
         # an argument parsing error (would need actual script to run)
 
@@ -77,29 +70,6 @@ class TestCLISubcommands:
         # Structural test
 
 
-class TestCLIStage4Integration:
-    """Test Stage 4 CLI integration."""
-
-    def test_stage4_with_depth(self):
-        """Test Stage 4 mode with depth parameter."""
-        # Verify that Stage 4 mode accepts depth parameter
-        test_args = ["vode", "--stage4", "--depth", "2", "script.py"]
-        # Structural test
-
-    def test_stage4_with_format(self):
-        """Test Stage 4 mode with different output formats."""
-        # Verify that Stage 4 mode accepts format parameter
-        for fmt in ["gv", "png", "svg", "pdf"]:
-            test_args = ["vode", "--stage4", "--format", fmt, "script.py"]
-            # Structural test
-
-    def test_stage4_with_output(self):
-        """Test Stage 4 mode with custom output path."""
-        test_args = ["vode", "--stage4", "--output", "custom.svg", "script.py"]
-        # Structural test
-
-
-class TestCLIModelTracking:
     """Test model tracking functionality."""
 
     def test_model_registry_initialization(self):
@@ -187,7 +157,6 @@ class TestCLIErrorHandling:
         args = MagicMock()
         args.script = "nonexistent_script.py"
         args.script_args = []
-        args.stage4 = False
         args.mode = "static"
         args.format = "svg"
         args.output = None
@@ -202,12 +171,6 @@ class TestCLIErrorHandling:
 
 class TestCLIArgumentCombinations:
     """Test various CLI argument combinations."""
-
-    def test_stage4_static_mode(self):
-        """Test Stage 4 with static mode."""
-        # This combination should be valid
-        test_args = ["vode", "--stage4", "--mode", "static", "script.py"]
-        # Structural test
 
     def test_depth_values(self):
         """Test different depth values."""
@@ -257,11 +220,6 @@ class TestCLIDepthParameter:
     def test_custom_depth(self):
         """Test custom depth values."""
         test_args = ["vode", "--depth", "3", "script.py"]
-        # Structural test
-
-    def test_depth_with_stage4(self):
-        """Test depth parameter with Stage 4 mode."""
-        test_args = ["vode", "--stage4", "--depth", "2", "script.py"]
         # Structural test
 
 

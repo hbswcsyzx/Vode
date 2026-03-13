@@ -188,86 +188,56 @@ def cmd_visualize(args):
 
         print(f"Visualizing model: {model.__class__.__name__}")
 
-        # Check if Stage 4 mode is enabled
-        if args.stage4:
-            # Use Stage 4 pipeline
-            print(f"Using Stage 4 pipeline (depth={args.depth or 1})...")
+        # Capture model structure
+        print(f"Capturing structure (depth={args.depth or 1})...")
 
-            if args.mode == "static":
-                exec_node = capture_static_execution_graph(model)
-            else:
-                print(
-                    "Error: Stage 4 dynamic mode requires sample input (use Python API)",
-                    file=sys.stderr,
-                )
-                return 1
+        if args.mode == "static":
+            exec_node = capture_static_execution_graph(model)
+        else:
+            print(
+                "Error: Dynamic mode requires sample input (use Python API)",
+                file=sys.stderr,
+            )
+            return 1
 
-            # Render with Stage 4 renderer (returns graphviz.Source object)
-            dot_graph = render_execution_graph(exec_node, max_depth=args.depth or 1)
+        # Render visualization
+        dot_graph = render_execution_graph(exec_node, max_depth=args.depth or 1)
 
-            # Determine output path and format
-            if args.output:
-                output_path = args.output
-                # Infer format from file extension if output is specified
-                if "." in output_path:
-                    inferred_format = output_path.rsplit(".", 1)[1]
-                    if inferred_format in ["gv", "png", "svg", "pdf"]:
-                        format_to_use = inferred_format
-                    else:
-                        format_to_use = args.format
+        # Determine output path and format
+        if args.output:
+            output_path = args.output
+            # Infer format from file extension if output is specified
+            if "." in output_path:
+                inferred_format = output_path.rsplit(".", 1)[1]
+                if inferred_format in ["gv", "png", "svg", "pdf"]:
+                    format_to_use = inferred_format
                 else:
                     format_to_use = args.format
             else:
                 format_to_use = args.format
-                # Save to output directory if it exists, otherwise current directory
-                output_dir = script_path.parent / "output" / script_path.stem
-                if output_dir.exists():
-                    output_path = str(
-                        output_dir / f"{script_path.stem}_stage4.{format_to_use}"
-                    )
-                else:
-                    output_path = f"{script_path.stem}_stage4.{format_to_use}"
-
-            # Save output
-            if format_to_use == "gv":
-                # Save DOT source directly
-                with open(output_path, "w") as f:
-                    f.write(dot_graph.source)
-                print(f"✓ DOT source saved to: {output_path}")
-            else:
-                # Render to image format
-                dot_graph.render(
-                    output_path.rsplit(".", 1)[0], format=format_to_use, cleanup=True
-                )
-                print(f"✓ Visualization saved to: {output_path}")
-
-            return 0
         else:
-            # Use old pipeline (backward compatibility)
-            print(f"Capturing {args.mode} structure...")
-            if args.mode == "static":
-                graph = capture_static(model)
+            format_to_use = args.format
+            # Save to output directory if it exists, otherwise current directory
+            output_dir = script_path.parent / "output" / script_path.stem
+            if output_dir.exists():
+                output_path = str(output_dir / f"{script_path.stem}.{format_to_use}")
             else:
-                print(
-                    "Error: Dynamic mode requires sample input (use Python API)",
-                    file=sys.stderr,
-                )
-                return 1
+                output_path = f"{script_path.stem}.{format_to_use}"
 
-            # Visualize
-            output_path = args.output or f"{script_path.stem}_{args.mode}.{args.format}"
-            print(f"Generating visualization: {output_path}")
-
-            visualize(
-                graph,
-                output_path=output_path,
-                format=args.format,
-                max_depth=args.depth,
-                collapse_loops=args.collapse_loops,
+        # Save output
+        if format_to_use == "gv":
+            # Save DOT source directly
+            with open(output_path, "w") as f:
+                f.write(dot_graph.source)
+            print(f"✓ DOT source saved to: {output_path}")
+        else:
+            # Render to image format
+            dot_graph.render(
+                output_path.rsplit(".", 1)[0], format=format_to_use, cleanup=True
             )
-
             print(f"✓ Visualization saved to: {output_path}")
-            return 0
+
+        return 0
 
     except Exception as e:
         print(f"Error during visualization: {e}", file=sys.stderr)
@@ -307,17 +277,11 @@ def main():
             help="Capture mode (default: static)",
         )
         trace_parser.add_argument("--output", "-o", help="Output file path")
-        trace_parser.add_argument(
-            "--stage4",
-            "-s4",
-            action="store_true",
-            help="Use Stage 4 pipeline (ExecutionNode-based)",
-        )
+        trace_parser.add_argument()
         trace_parser.add_argument(
             "--depth",
             type=int,
             default=1,
-            help="Recursive expansion depth for Stage 4 (default: 1)",
         )
         trace_parser.add_argument(
             "--format",
@@ -357,12 +321,7 @@ def main():
             action="store_false",
             help="Do not collapse loop patterns",
         )
-        view_parser.add_argument(
-            "--stage4",
-            "-s4",
-            action="store_true",
-            help="Use Stage 4 pipeline (ExecutionNode-based)",
-        )
+        view_parser.add_argument()
 
         args = parser.parse_args()
 
@@ -384,13 +343,6 @@ def main():
 Examples:
   # Visualize a model (default: static mode, SVG output)
   vode script.py
-  
-  # Visualize with Stage 4 pipeline
-  vode --stage4 --depth 1 script.py
-  vode --stage4 --depth 2 --format png script.py
-  
-  # Visualize with options (old pipeline)
-  vode --mode static --format png --depth 5 script.py
   
   # Trace and save to file
   vode trace --output model_trace.json script.py
@@ -441,12 +393,7 @@ Examples:
             action="store_false",
             help="Do not collapse loop patterns",
         )
-        parser.add_argument(
-            "--stage4",
-            "-s4",
-            action="store_true",
-            help="Use Stage 4 pipeline (ExecutionNode-based)",
-        )
+        parser.add_argument()
 
         args = parser.parse_args()
         return cmd_visualize(args)

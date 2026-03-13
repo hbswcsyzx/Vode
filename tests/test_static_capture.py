@@ -6,7 +6,7 @@ Tests capture_static_execution_graph() and module hierarchy building.
 import pytest
 import torch
 import torch.nn as nn
-from vode.capture.static_capture import (
+from vode.capture.computation_tracer import (
     capture_static_execution_graph,
     _count_parameters,
     _module_to_operation_info,

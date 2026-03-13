@@ -438,13 +438,13 @@ vode trace [OPTIONS] SCRIPT [ARGS...]
   --mode {function|computation}  捕获模式(必选)
   --capture-data                 捕获详细数据(参数、张量统计等)
   --output, -o PATH              输出文件路径(默认：SCRIPT.vode.json)
-  --max-depth INT                最大捕获深度
+  --depth INT                    最大捕获深度
   --filter PATTERN               过滤规则(正则表达式)
 
 示例：
   vode trace --mode function train.py
   vode trace --mode computation --capture-data model.py --output model_trace.json
-  vode trace --mode function --max-depth 5 deep_recursion.py
+  vode trace --mode function --depth 5 deep_recursion.py
 ```
 
 ### `vode export` - 导出静态图片
@@ -466,21 +466,21 @@ vode export [OPTIONS] TRACE_FILE OUTPUT_FILE
 
 ### `vode view` - 交互式查看
 
+> 待完善
+
 ```bash
 vode view [OPTIONS] TRACE_FILE
 
 选项：
   --port INT                     服务器端口(默认：8000)
-  --no-browser                   不自动打开浏览器
-  --vscode                       在 VSCode webview 中打开
 
 示例：
   vode view trace.json
-  vode view trace.json --port 8080
-  vode view trace.json --vscode
 ```
 
 ### `vode editor` - 可视化编辑器(未来)
+
+> 待完善
 
 ```bash
 vode editor [OPTIONS] [MODEL_FILE]

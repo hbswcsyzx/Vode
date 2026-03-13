@@ -16,13 +16,12 @@ Usage:
 import argparse
 import sys
 import runpy
+import json
 from pathlib import Path
 from typing import Any, List
 
 # Import from reorganized modules
 from vode.capture import (
-    capture_static,
-    capture_dynamic,
     capture_static_execution_graph,
     capture_dynamic_execution_graph,
 )
@@ -87,14 +86,34 @@ def cmd_trace(args):
             print("Warning: No PyTorch models detected in script", file=sys.stderr)
             return 1
 
-        # Use the last created model (usually the main model)
-        model = _model_registry[-1]
+        # Find the top-level model (one that is not a child of any other model)
+        # This is typically the main model, not submodules
+        top_level_models = []
+        for model in _model_registry:
+            is_top_level = True
+            for other in _model_registry:
+                if model is not other and any(m is model for m in other.modules()):
+                    is_top_level = False
+                    break
+            if is_top_level:
+                top_level_models.append(model)
+
+        if not top_level_models:
+            # Fallback to last created model
+            model = _model_registry[-1]
+        else:
+            # Use the largest top-level model (by parameter count)
+            model = max(
+                top_level_models, key=lambda m: sum(p.numel() for p in m.parameters())
+            )
+
         print(f"Detected model: {model.__class__.__name__}")
+        print(f"  Parameters: {sum(p.numel() for p in model.parameters()):,}")
 
         # Capture based on mode
         if args.mode == "static":
             print("Capturing static structure...")
-            graph = capture_static(model)
+            root_node = capture_static_execution_graph(model)
         else:
             print(
                 "Error: Dynamic mode requires sample input (use Python API)",
@@ -106,10 +125,9 @@ def cmd_trace(args):
         output_path = args.output or f"{script_path.stem}_trace.json"
         print(f"Saving trace to: {output_path}")
 
-        # Convert graph to JSON
+        # Convert ExecutionNode to JSON
         graph_data = {
-            "nodes": [node.to_dict() for node in graph.all_nodes.values()],
-            "root_id": graph.root_node.node_id if graph.root_node else None,
+            "root": root_node.to_dict(),
             "mode": args.mode,
         }
 
@@ -117,6 +135,8 @@ def cmd_trace(args):
             json.dump(graph_data, f, indent=2)
 
         print(f"✓ Trace saved successfully")
+        print(f"  Root node: {root_node.name}")
+        print(f"  Total children: {len(root_node.children)}")
         return 0
 
     except Exception as e:
@@ -277,7 +297,6 @@ def main():
             help="Capture mode (default: static)",
         )
         trace_parser.add_argument("--output", "-o", help="Output file path")
-        trace_parser.add_argument()
         trace_parser.add_argument(
             "--depth",
             type=int,
@@ -321,7 +340,6 @@ def main():
             action="store_false",
             help="Do not collapse loop patterns",
         )
-        view_parser.add_argument()
 
         args = parser.parse_args()
 
